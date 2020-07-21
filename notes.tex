@@ -11,6 +11,7 @@
 \newcommand{\Ee}{\mathcal{E}}
 \newcommand{\Gg}{\mathcal{G}}
 \newcommand{\Hh}{\mathcal{H}}
+\newcommand{\Ii}{\mathcal{I}}
 \newcommand{\Ll}{\mathcal{L}}
 \newcommand{\Ss}{\mathcal{S}}
 \newcommand{\Xx}{\mathcal{X}}
@@ -182,9 +183,9 @@
             %
             So we have solved the mystery.  With $n$ people, the number $p(n)$
             of pieces equals the number of subsets of $n-1$ people with at most
-            $4$ members.  Ain't that cool?  
+            $4$ members.    
  
-    \section{Finite Hypothesis Classes}
+    \section{Learning to Classify}
         \subsection{What is Learning?}
             Today, we'll analyze machines that learn to classify images into
             two possible buckets such as Cow and Dog.
@@ -203,13 +204,7 @@
             $(\sdia{cow-a}, \text{Cow})$ is more likely to occur in nature than 
             $(\sdia{cow-d}, \text{Cow})$, which is more likely to occur than
             $(\sdia{cow-d}, \text{Dog})$, which in turn is more likely than
-            $(\sdia{cow-a}, \text{Dog})$.\footnote{
-                %To focus our intuition,
-                Let's say that each individual image
-                appears with has negligible probability and that Cows occurs
-                roughly as much as Dogs.
-                %Our math won't depend on these assumptions.
-            }
+            $(\sdia{cow-a}, \text{Dog})$.
 
             A \textbf{classifier} is then a function from images to
             buckets, that is, some $f\in \Yy^{\Xx}$.  By \textbf{learning}, we
@@ -275,7 +270,7 @@
 
             We hope $\Ee_{\text{out}}$ is low, but we don't know
             $\Ee_{\text{out}}$: from $\Ss$, we can directly calculate only
-            $\Ee_{\text{in},\Ss}$.  Intuit that
+            $\Ee_{\text{in},\Ss}$.  Intuiting that
             $ 
                 \Ee_{\text{gap},\Ss} = \Ee_{\text{out}} - \Ee_{\text{in},\Ss}
             $ 
@@ -288,7 +283,7 @@
             %its variants dominate modern
             %machine learning.
             
-            The ERM $\Ll$ will work when $\Ee_{\text{gap},\Ss}$ is small.
+            This $\Ll$ will work when $\Ee_{\text{gap},\Ss}$ is small.
             But is $\Ee_{\text{gap},\Ss}$ actually small?  In particular, if
             $\Ll(\Ss)$ accurately classifies its training samples, will it also
             accurately classify test samples it has never before seen?
@@ -311,8 +306,10 @@
                     f(x) = \text{say Cow if $(x,\text{Cow}) \in \Ss$;
                             otherwise, say Dog}
                 $$
-                The problem is, $f$ will misclassify every fresh image of a Cow
-                as a Dog, so it will have a huge out-error!
+                The problem (assuming each image appears with negligible chance
+                and that Cows occur with non-negligible chance) is $f$ will
+                misclassify every fresh image of a Cow as a Dog, so it will
+                have a huge out-error!
 
             These two examples illustrate that $\Ll$'s training performance
             generalizes to test time when $\Ll$ uses lots of datapoints to
@@ -375,18 +372,18 @@
             What if $\Hh$ contains multiple (say, $H$ many) candidates?
             Well, each candidate $f\in \Hh$ has
             $
-                \Ee_{\text{gap}}(f) \geq \Gg(\delta/H)
+                \Ee_{\text{gap},\Ss}(f) \geq \Gg(\delta/H)
             $
             with probability at most $\delta/|\Hh|$.  Therefore, the chance
             that some $f\in \Hh$ has
             $
-                \Ee_{\text{gap}}(\Ll) \geq \Gg(\delta/H)
+                \Ee_{\text{gap},\Ss}(\Ll) \geq \Gg(\delta/H)
             $
             is at most $H$ times $\delta/H$.  In sum,
             with probability at least $1-\delta$ the gap will be small:
             $$
-                \Ee_{\text{gap}}(\Ll)
-                    \leq \EE_{\Ss}\left[\max_{f\in\Hh} \Ee_{\text{gap}, \Ss}(f)\right]
+                \Ee_{\text{gap},\Ss}(\Ll)
+                    \leq \max_{f\in\Hh} \Ee_{\text{gap}, \Ss}(f)
                     < \Gg(\delta/H)
                     = \sqrt{\log(H/\delta)/N}
             $$
@@ -396,7 +393,7 @@
             more data points we have, the smaller will be the generalization
             gap bound $\Gg(\delta/H)$.
 
-            Here's an example.  Suppose we train a neural that has $10^3$
+            Here's an example.  Suppose we train a neural net that has $10^3$
             parameters, each a floating point number.  Since there are at most
             $2^{32}$ possible floating point numbers, $H$ is at most
             $2^{32\cdot 10^3}$.  If we train on $10^6$ images, then with
@@ -408,18 +405,27 @@
                 \approx 10\%
             $$
             So if after training, the neural net's training accuracy is $80\%$,
-            we can expect its testing accuracy to be at least $70\%$.  It is
-            amazing that we can mathematically prove this about its test
-            accuracy.
+            we can expect its testing accuracy to be at least $70\%$.
+            We proved this without knowing $\Dd$; we used simply that $\Dd$
+            exists at all!  Ain't that cool?
 
-    \section{Infinite Hypothesis Classes}
+    \section{Structure in $\Hh$}
         \subsection{Symmetrization}
-        \subsection{VC Dimension}
+        \subsection{The Vapnik Chervonenkis Dimension}
 
-    \section{}
-    \section{}
-    \section{}
+    \section{Structure in $\Dd$}
+        \subsection{Rademacher Complexity}
+        \subsection{Margin Bounds}
 
+    \section{Structure in $\Ll$}
+        \subsection{Privacy and Generalization}
+        \subsection{The Akaike Information Criterion and its Cousins}
+
+    \section{Frame Conditions and Independence}
+        \subsection{Simplicity and Subjectivity}
+        \subsection{Independence in Practice?}
+
+    \newpage
     \section*{Helping Handout: Binomial Coefficients ${n \choose k}$}
         How many ways can we select $k$ people out of $n$ people?
         For example,
@@ -450,19 +456,20 @@
         Also, when $n$ is positive, ${n\choose k} = {n-1\choose k-1} +
         {n\choose k-1}$, since to choose $k$ folks from among a group of $n-1$
         students and $1$ teacher, we can \textbf{either} choose $k$ students
-        and leave out the teacher or choose $k-1$ students and also the
-        teacher.
+        and leave out the teacher \textbf{or} choose $k-1$ students and also
+        the teacher.
         %
         Another neat fact is that
         $
             {n\choose 0} + {n\choose 1} + {n\choose 2} + \cdots + {n\choose k}
             = 2^n
         $
-        as long as $n\leq k$.  This is because that sum of binomial
-        coefficients counts the number of ways to choose some subset of size at
+        as long as $n\leq k$.  This is because that sum
+        counts the number of ways to choose some subset of size at
         most $k$ from among $n$ people.  
 
     \section*{Helping Handout: Asymptotics}
+
     \section*{Helping Handout: Probability and Expectation}
         How can we model the notion of \textbf{chance} using math?
         For example, we might have a set $\Xx=[0\,\text{cm}, 50\,\text{cm}]$ of
@@ -470,15 +477,31 @@
         any one particular rainfall level like $6.28318\cdots\,\text{cm}$ will
         occur today.  But we'd say there is some chance that the rainfall will
         fall within, say, $[6.2\,\text{cm}, 6.3\,\text{cm}]$.
-
+        %
         Thus, in order to treat $\Xx$ probabilistically, we want to assign to
-        each interval $[a,b]$ inside $\Xx$ a nonnegative number $\PP([a,b])$
-        that tells us the chance that rainfall will fall within $[a,b]$.
+        each interval $I \subseteq \Xx$ a nonnegative number $\PP(I)$ that
+        tells us the chance that rainfall will fall within $I$.  In order for
+        this bunch of numbers to make sense, we demand $\PP(\Xx)=1$ and that,
+        whenever a bunch of intervals $I_0, I_1, \cdots$ partition a bigger
+        interval $J$, then $\PP(I_0) + \PP(I_1) + \cdots = \PP(J)$.
+        By the way, it is convenient to think of $\PP$ as defined on unions of
+        disjoint intervals instead of intervals.
 
-        More generally, we  
-        In
-        order for this bunch of numbers to make sense, we demand $\PP(\Xx)=1$
-        and $\PP([a,c]) + \PP([b,b]) = \PP([a,b])+\PP([b,c])$.
+        In general, we say that a \textbf{probability distribution} on a set
+        $\Xx$ is a bunch of ``generalized unions-of-intervals'' that are
+        subsets of $\Xx$, each labeled by a nonnegative number, that follows
+        the above demands.  Precisely, the data is: a collection $\Ii \subseteq
+        2^\Xx$ of subsets of $\Xx$ and a function $\PP:\Ii\to [0, 1]$, such
+        that the following are well-defined and true whenever $I, I_0, I_1,
+        \cdots \in \Ii$.
+        $$ 
+            \PP(\Xx - I) + \PP(I) = \PP(\Xx) = 1 
+        $$
+        and
+        $$
+            \PP(I_0) + \PP(I_1) + \cdots = \PP(I_0 \cup I_1 \cup \cdots)
+            ~ \text{when the $I$'s are disjoint}
+        $$
 
     \section*{Helping Handout: Vectors and Covectors}
     
