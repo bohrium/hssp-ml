@@ -6,8 +6,10 @@
 
 \newcommand{\EE}{\mathbb{E}}
 \newcommand{\PP}{\mathbb{P}}
+%
 \newcommand{\Dd}{\mathcal{D}}
 \newcommand{\Ee}{\mathcal{E}}
+\newcommand{\Gg}{\mathcal{G}}
 \newcommand{\Hh}{\mathcal{H}}
 \newcommand{\Ll}{\mathcal{L}}
 \newcommand{\Ss}{\mathcal{S}}
@@ -100,9 +102,9 @@
             There are two steps: we'll relate cake to constellations
             and then relate constellations to counting.
 
-            We'll use Euler's polyhedron formula.  This formula says that if we
-            connect a bunch of dots by edges to form some enclosed regions,
-            then the numbers of dots, edges, and regions are related:
+            We'll use \textbf{Euler's polyhedron formula}.  This formula says
+            that if we connect a bunch of dots by edges to form some enclosed
+            regions, then the numbers of dots, edges, and regions are related:
             $$
                 \text{Regions} - \text{Edges} + \text{Dots} = 1
             $$
@@ -179,64 +181,82 @@
             as $k\leq n-1$, this looks like powers of two as long as $n\leq 5$.  
             %
             So we have solved the mystery.  With $n$ people, the number $p(n)$
-            of pieces equals the number of subsets of people with at most $4$
-            members.  Ain't that cool?  
+            of pieces equals the number of subsets of $n-1$ people with at most
+            $4$ members.  Ain't that cool?  
  
     \section{Finite Hypothesis Classes}
         \subsection{What is Learning?}
             Today, we'll analyze machines that learn to classify images into
-            two possible buckets such as Cow and Dog.  Most of our discussion
-            extends to the case where there are more than two buckets and to
-            other more complicated situations.  But we'll just focus on the
-            simple case.  
+            two possible buckets such as Cow and Dog.
+            %Our discussion extends to more complicated situations, but we'll
+            %focus on the simple case.  
+            To benefit from math, we need a precise set-up.  What do we mean
+            by ``learning to classify''?
 
-            To use math, we need to precisely set up what we mean by ``machine
-            learning''.  Here's how we'll do it in this class: we posit a set
-            $\Xx$ of all possible images, a set $\Yy=\{\text{Cow},\text{Dog}\}$
-            of buckets, and a probability distribution $\Dd$ over $\Xx \times
-            \Yy$.  The distribution $\Dd$ models the world by telling us which
-            pairs $(x,y)\in \Xx\times \Yy$ are more likely and which are less
-            likely.  For instance: we might have $\sdia{cow-a},
+            Say $\Xx$ contains all possible images and
+            $\Yy=\{\text{Cow},\text{Dog}\}$ is the set of buckets.  We posit a
+            probability distribution $\Dd$ over $\Xx \times \Yy$ that says
+            which pairs $(x,y)\in \Xx\times \Yy$ are more likely and which are
+            less likely.  For instance: we might have $\sdia{cow-a},
             \sdia{cow-d},\cdots \in \Xx$, and $\Dd$ might say that
+            %
             $(\sdia{cow-a}, \text{Cow})$ is more likely to occur in nature than 
             $(\sdia{cow-d}, \text{Cow})$, which is more likely to occur than
             $(\sdia{cow-d}, \text{Dog})$, which in turn is more likely than
-            to occur in nature than
-            $(\sdia{cow-a}, \text{Dog})$.
+            $(\sdia{cow-a}, \text{Dog})$.\footnote{
+                %To focus our intuition,
+                Let's say that each individual image
+                appears with has negligible probability and that Cows occurs
+                roughly as much as Dogs.
+                %Our math won't depend on these assumptions.
+            }
 
-            So far, we've given names $\Xx, \Yy, \Dd$ to aspects of the world.
-            What's cool is that we don't have to know $\Dd$ in order for our
-            mathematical theory to work!  We gave it a name just so we can
-            reason about it.  While $\Dd$ models the world, we'd like our
-            machine to learn by pondering finitely many sample pairs drawn from
-            $\Dd$.  It's like learning which way a die is loaded by throwing it
-            a hundred times and tabulating the results.  So we posit a set
-            $\Hh$ of functions from $\Xx$ to $\Yy$.  Each function is one
-            possible way of classifying images, and $\Hh$ is a set of many such
-            functions.  We call these functions \textbf{hypotheses}, since we
-            don't know which ones are good.  
+            A \textbf{classifier} is then a function from images to
+            buckets, that is, some $f\in \Yy^{\Xx}$.  By \textbf{learning}, we
+            mean acquiring information about $\Dd$ from ``training samples''
+            $\Ss \in (\Xx\times\Yy)^N$ drawn independently from $\Dd$.  So
+            ``learning to classify'' means mapping $\Ss$s to $f$s.  In
+            particular, an \textbf{algorithm} is a function
+            $\Ll:(\Xx\times\Yy)^N\to \Yy^{\Xx}$  
+
+            %By the way, we don't have to know $\Dd$ in order to apply our
+            %theory; we just named it in order to reason about it.  We'd like
+            %our machine to learn by pondering finitely many sample pairs drawn
+            %from $\Dd$.
+
+            Instead of considering all possible classifiers, we usually limit
+            ourselves to some subset $\Hh \subseteq \Yy^{\Xx}$ of especially
+            nice, ``candidate'' classifiers.
             %
             As an example, $\Hh$ might have just three elements:
             \begin{align*}
                 \Hh = \{
                     &\text{always say Cow}, \\
-                    &\text{say Cow if $x$ is brown on average; otherwise, say Dog}, \\
-                    &\text{say Cow if $x \in \{\sdia{cow-b}, \sdia{cow-c}, \sdia{cow-e}\}$;
-                        otherwise, say Dog}
+                    &\text{say Cow if $x$ is brown on average
+                        and otherwise say Dog}, \\
+                    &\text{say Cow if
+                        $x \in \{\sdia{cow-b}, \sdia{cow-c}, \sdia{cow-e}\}$
+                        and otherwise say Dog}
                 \}
             \end{align*}
             In practice, $\Hh$ will actually be something like a set of neural
-            networks, which is effectively an infinite set.
-
-            A \textbf{learner} is then a rule $\Ll$ that assigns --- to each
-            length-$N$ sequence $\Ss = ((x_i, y_i): 0\leq i<N)$ of samples ---
-            a hypothesis $\Ll(\Ss) \in \Hh$.
+            networks, which is a much bigger set.
             %
-            A learner $\Ll$ is good when $\Ll(\Ss)$ classifies images
-            accurately.  We mean not just the images (in $\Ss$) that we learned
-            from; we want $\Ll$ to accurately classify new images freshly drawn
-            from $\Dd$!  More formally, we define the \textbf{out-error} and
-            \textbf{in-error} of a hypothesis $f \in \Hh$ as
+            \begin{figure}[h!]
+                \centering
+                \includegraphics[height=3cm]{hd}
+                \caption{\emph{
+                    A cartoon of $\Dd$ (clouds) and $\Hh$ (curves) with
+                    the $\Xx$ axis horizontal and the $\Yy$ axis vertical. 
+                }}
+            \end{figure}
+
+            An algorithm $\Ll$ is good when $\Ll(\Ss)$ accurately classifies
+            images freshly drawn from $\Dd$.  Notice that this is different
+            from merely asking that $\Ll(\Ss) $accurately classifies the
+            elements of $\Ss$!  To notate this difference, we define the
+            \textbf{out-error} and \textbf{in-error} of a candidate $f \in \Hh$
+            as
             $$
                 \Ee_{\text{out}}(f) = \PP_{(x,y)\sim\Dd}   
                                         \left[
@@ -248,59 +268,220 @@
                                            f(x) \neq y
                                        \right]
             $$
-            Likewise, the out- and in-errors of a learner are
+            Likewise, the out- and in-errors of a algorithm are
             $
-                \Ee_{\cdots}(\Ll) = \EE_{\Ss\sim\Dd} \left[
-                                        \Ee_{\cdots}(\Ll(\Ss)) 
-                                    \right]
-            $.
-            We want $\Ee_{\text{out}}(f)$ to be low, but we can only directly
-            calculate $\Ee_{\text{in}}(f)$, since we have access to the samples
-            $\Ss$ but not the full distribution $\Dd$.
+                \Ee_{\cdots}(\Ll) = \Ee_{\cdots}(\Ll(\Ss)) 
+            $ where $\Ss\sim\Dd$.
 
-            Based on the intuition that $\Ee_{\text{out}}(f)$ and
-            $\Ee_{\text{in},\Ss}(f)$ look similar, we propose a special learner
-            $\Ll$ that works like this: compute the in-error
-            $\Ee_{\text{in},\Ss}(f)$ for each $f\in \Hh$, and (breaking ties
-            arbitrarily) settle on whichever $f$ has the smallest in-error.
-            This heuristic is called \textbf{empirical risk minimization}, and
-            its variants dominate modern machine learning.
+            We hope $\Ee_{\text{out}}$ is low, but we don't know
+            $\Ee_{\text{out}}$: from $\Ss$, we can directly calculate only
+            $\Ee_{\text{in},\Ss}$.  Intuit that
+            $ 
+                \Ee_{\text{gap},\Ss} = \Ee_{\text{out}} - \Ee_{\text{in},\Ss}
+            $ 
+            tends to be small, we might design $\Ll$ to minimize $\Ee_{\text{in},\Ss}$.
+            That is, $\Ll$ computes $\Ee_{\text{in},\Ss}(f)$ for
+            each $f\in \Hh$, then (breaking ties arbitrarily) to settle on an
+            $f$ with the least $\Ee_{\text{in},\Ss}$.
+            %This $\Ll$ is called
+            %\textbf{ERM};
+            %its variants dominate modern
+            %machine learning.
+            
+            The ERM $\Ll$ will work when $\Ee_{\text{gap},\Ss}$ is small.
+            But is $\Ee_{\text{gap},\Ss}$ actually small?  In particular, if
+            $\Ll(\Ss)$ accurately classifies its training samples, will it also
+            accurately classify test samples it has never before seen?
 
-            But does this special learner $\Ll$ actually work?  In particular,
-            if $\Ee_{\text{in},\Ss}(\Ll)$ is small, will
-            $\Ee_{\text{out}}(\Ll)$ also be small?  This is the question of
-            \textbf{generalization}.
-
-            Here's an example where the answer is yes.
-                Imagine that there's one hypothesis $f\in \Hh$ (so $|\Hh| = 1$)
-                and $N=10000$ datapoints.  Then $\Ee_{\cdots}(\Ll) =
-                \Ee_{\cdots}(f)$, and by the law of large numbers
-                $\Ee_{in,\Ss}(f)$ will with high probability be very close to
-                $\Ee_{out}(f)$.
-
-            Here's an example where the answer is no.
-                Imagine that every possible function is in $\Hh$ (so $\Hh$ is
-                very infinite), but only $N=3$ datapoints.  For any fixed $\Ss$,
-                many hypotheses will have the same $\Ee_{\in,\Ss}$
-                (pigeonhole).  Suppose $\Ll$ breaks ties in favor of
-                memorizing; that is, $\Ll$ always settles on the hypothesis,
+            Sometimes, the answer is \textbf{yes}.
+                If there is $1$ candidate $f\in \Hh$ and millions of
+                datapoints, then $\Ee_{\cdots}(\Ll) = \Ee_{\cdots}(f)$, then
+                $\Ee_{\text{in},\Ss}(f)$ will very probably be very close to
+                $\Ee_{\text{out}}(f)$.  This is for the same reason that we
+                expect close to $16.6\%$ sixes among a million rolls of a fair
+                die. 
+            %
+            Other times, the answer is \textbf{no}.
+                If every possible classifier is a candidate (so $\Hh$ is very
+                infinite) and only a few datapoints, then for any training
+                sequence $\Ss$, many candidates will perfectly classify the
+                training samples.  Say that $\Ll$ breaks ties 
+                by settling on
                 $$
                     f(x) = \text{say Cow if $(x,\text{Cow}) \in \Ss$;
                             otherwise, say Dog}
                 $$
-                Then $f$ may have $\Ee_{\text{in},\Ss}(f)=0$, but unless the exact 
-                images in $\Ss$ were extremely common, or unless most mammals
-                are Dogs, $f$ will have $\Ee_{\text{out}}(f)\approx 1$.
+                The problem is, $f$ will misclassify every fresh image of a Cow
+                as a Dog, so it will have a huge out-error!
 
-            Intuitively, when $\Hh$ contains many hypothesis,
-            generalization is difficult, and when the number $N$ of datapoints
-            is large, generalization is easy.  How do these conflicting forces
-            balance?  Let's use math to find out.
+            These two examples illustrate that $\Ll$'s training performance
+            generalizes to test time when $\Ll$ uses lots of datapoints to
+            select from only a small set of candidates.  
+            %
+            How do these forces balance, for example if there are a lot of
+            candidates and also a lot of datapoints?  Let's find out.
 
         \subsection{Is Learning Possible?}
+            Let's analyze the case $|\Hh|=1$ more closely.  We write $p$ as
+            shorthand for $\Ee_{\text{out}}(f)$; then $\Ee_{\text{in},\Ss}$
+            counts the fraction of heads that appear in $N$ independent flips
+            of a coin that has chance $p$ of landing heads.  Intuitively
+            $\Ee_{\text{in},\Ss}$ will usually be close to $p$ when $N$ is big.
+            Let's make ``usually'', ``close to'', and ``big''  precise.
+
+            \begin{figure}[h!]
+                \centering
+                \includegraphics[height=4cm]{chernoff}
+                \caption{\emph{
+                    We randomly select points on $N$ vertical sticks.  Each
+                    stick has three parts: \textbf{green} with length $1-p$,
+                    \textbf{red} with length $p$, and \textbf{blue} with length
+                    $g$.  We call non-blue points \textbf{boxed} and non-green
+                    points \textbf{white}.
+                }}
+            \end{figure}
+
+            We'll switch viewpoints: flipping a coin is like choosing a boxed
+            point on a stick where green means tails and red means heads.
+            %
+            We'll show that probably at most $M_0 = (p+g)N$ heads
+            appear.  That is, we want to show --- given that all points are
+            boxed --- that probably at most $M_0$ points are red. 
+            %
+            For any $M\geq M_0$:
+            \begin{align*}
+                    & ~ \PP[\text{$M$ are red $\mid$ all are boxed}] \\
+                  = & ~ \PP[\text{$M$ are red and all are boxed}] ~/~ 
+                        \PP[\text{all are boxed}]  \\
+                  = & ~ \PP[\text{$M$ are white}] \cdot
+                        \PP[\text{all whites are red $\mid$ $M$ are white}] ~/~
+                        \PP[\text{all are boxed}] \\
+                  = & ~ \PP[\text{$M$ are white}] \cdot (1+g/p)^{-M} ~/~ (1+g)^{-N}  \\
+                \leq& ~ \PP[\text{$M$ are white}] \cdot (1+g/p)^{-M_0} ~/~ (1+g)^{-N} 
+            \end{align*}
+            Since the above holds for all $M\geq M_0$, we conclude:
+            \begin{align*}
+                ~   & ~ \PP[\text{at least $M_0$ are red $\mid$ all are boxed}] & \\
+                \leq& ~ (1+g/p)^{-M_0} (1+g)^{-N}               & \text{probabilities are at most $1$} \\
+                \leq& ~ \exp(-M_0 g/p) \exp(Ng)                 & \text{$\exp$ is convex} \\ 
+                =   & ~ \exp(-(p+g)N g/p + Ng) = \exp(-Ng^2/p)  & \text{substitute $M_0=(p+g)N$} \\ 
+                \leq& ~ \exp(-Ng^2)                             & \text{probabilities are at most $1$}
+            \end{align*}
+            This is the \textbf{Chernoff bound} for coin flips.  We can say the
+            same thing in a different way by solving for $g$; we find that with
+            probability at most $\delta$ will the generalization gap exceed
+            $\sqrt{\log(1/\delta)/N}$.  Call this $\Gg(\delta)$.
+
+            What if $\Hh$ contains multiple (say, $H$ many) candidates?
+            Well, each candidate $f\in \Hh$ has
+            $
+                \Ee_{\text{gap}}(f) \geq \Gg(\delta/H)
+            $
+            with probability at most $\delta/|\Hh|$.  Therefore, the chance
+            that some $f\in \Hh$ has
+            $
+                \Ee_{\text{gap}}(\Ll) \geq \Gg(\delta/H)
+            $
+            is at most $H$ times $\delta/H$.  In sum,
+            with probability at least $1-\delta$ the gap will be small:
+            $$
+                \Ee_{\text{gap}}(\Ll)
+                    \leq \EE_{\Ss}\left[\max_{f\in\Hh} \Ee_{\text{gap}, \Ss}(f)\right]
+                    < \Gg(\delta/H)
+                    = \sqrt{\log(H/\delta)/N}
+            $$
+
+            What we have shown is that, if our algorithm $\Ll$ selects from among
+            a finite number of candidates, then learning is possible: the
+            more data points we have, the smaller will be the generalization
+            gap bound $\Gg(\delta/H)$.
+
+            Here's an example.  Suppose we train a neural that has $10^3$
+            parameters, each a floating point number.  Since there are at most
+            $2^{32}$ possible floating point numbers, $H$ is at most
+            $2^{32\cdot 10^3}$.  If we train on $10^6$ images, then with
+            probability $99.99\%=1-10^{-4}$, the generalization gap is less
+            than
+            $$
+                \sqrt{\log(2^{32\cdot 10^3}/10^{-4})/10^6}
+                \approx 9.8\%
+                \approx 10\%
+            $$
+            So if after training, the neural net's training accuracy is $80\%$,
+            we can expect its testing accuracy to be at least $70\%$.  It is
+            amazing that we can mathematically prove this about its test
+            accuracy.
 
     \section{Infinite Hypothesis Classes}
-        \subsection{}
-        \subsection{}
+        \subsection{Symmetrization}
+        \subsection{VC Dimension}
+
+    \section{}
+    \section{}
+    \section{}
+
+    \section*{Helping Handout: Binomial Coefficients ${n \choose k}$}
+        How many ways can we select $k$ people out of $n$ people?
+        For example,
+        there is just $1$ way to choose a pair ($k=2$) from among $n=2$ people.
+        There are $3$ pairs among $n=3$ people.
+        And there are $6$ pairs among $n=4$ people.
+        We write the answer to this question as ${n\choose k}$; so
+        ${4\choose 2} = 6$. 
+        
+        While ${n\choose k}$ counts size-$k$ subsets, so that picking Alice 
+        and Bob is the same as picking Bob and Alice, we might want to count
+        ordered subsets.
+        How about if we want to order $k=4$ people out of $n=10$ people?
+        Well, there are $10$ ways to select the first person,
+                         $9$ ways to select the second person,
+                         $8$ ways to select the third person, and
+                         $7$ ways to select the fourth person.
+        So the answer is $10\cdot 9\cdot 8\cdot 7$.
+        But each size-$k$ unordered subset corresponds to
+        $4\cdot 3\cdot 2\cdot 1$ ordered subsets.  So we conclude that
+        $$
+            {10\choose 4} = \frac{10\cdot 9\cdot 8\cdot 7}{4\cdot 3\cdot 2\cdot 1} 
+        $$
+
+        Notice that ${n \choose 0} = 1$, since there is always exactly one way
+        to choose none of the $n$ people.
+        %
+        Also, when $n$ is positive, ${n\choose k} = {n-1\choose k-1} +
+        {n\choose k-1}$, since to choose $k$ folks from among a group of $n-1$
+        students and $1$ teacher, we can \textbf{either} choose $k$ students
+        and leave out the teacher or choose $k-1$ students and also the
+        teacher.
+        %
+        Another neat fact is that
+        $
+            {n\choose 0} + {n\choose 1} + {n\choose 2} + \cdots + {n\choose k}
+            = 2^n
+        $
+        as long as $n\leq k$.  This is because that sum of binomial
+        coefficients counts the number of ways to choose some subset of size at
+        most $k$ from among $n$ people.  
+
+    \section*{Helping Handout: Asymptotics}
+    \section*{Helping Handout: Probability and Expectation}
+        How can we model the notion of \textbf{chance} using math?
+        For example, we might have a set $\Xx=[0\,\text{cm}, 50\,\text{cm}]$ of
+        possible daily rainfall levels.  Intuitively, there is zero chance that
+        any one particular rainfall level like $6.28318\cdots\,\text{cm}$ will
+        occur today.  But we'd say there is some chance that the rainfall will
+        fall within, say, $[6.2\,\text{cm}, 6.3\,\text{cm}]$.
+
+        Thus, in order to treat $\Xx$ probabilistically, we want to assign to
+        each interval $[a,b]$ inside $\Xx$ a nonnegative number $\PP([a,b])$
+        that tells us the chance that rainfall will fall within $[a,b]$.
+
+        More generally, we  
+        In
+        order for this bunch of numbers to make sense, we demand $\PP(\Xx)=1$
+        and $\PP([a,c]) + \PP([b,b]) = \PP([a,b])+\PP([b,c])$.
+
+    \section*{Helping Handout: Vectors and Covectors}
     
 \end{document}
+
+
