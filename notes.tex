@@ -1,8 +1,20 @@
-\documentclass{article}
-\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
-\usepackage[dvipsnames]{xcolor}
+\documentclass[openany, notitlepage, justified]{tufte-book}
 \usepackage{amsmath, amssymb, amsthm}
-\usepackage{graphicx}
+\usepackage{graphicx, epsdice}
+
+\geometry{                                                                      
+    height=11.0in,                                                              
+    width=8.5in,                                                                
+    left=1in, % left margin                                                     
+    textwidth=5.0in, % main text block                                          
+    marginparsep=0.2in, % gutter between main text block and margin notes       
+    marginparwidth=1.8in % width of margin notes                                
+}    
+
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+\makeatother
 
 \newcommand{\EE}{\mathbb{E}}
 \newcommand{\PP}{\mathbb{P}}
@@ -25,15 +37,17 @@
 
 \begin{document}
 
+    \begin{adjustwidth}{0in}{-1.9in}
     \begin{center}
-        \LARGE
+        \Huge 
         Generalization in Machine Learning \\
-        \normalsize
+        \large         
         Sam, Joe, and Arthur ~~~~~~~~~~ 2020 Summer
     \end{center}
-        
-    \section{The Cake Problem}
-        \subsection{A Tempting Pattern}
+    \end{adjustwidth}
+
+    \chapter{The Cake Problem}
+        \section{A Tempting Pattern}
             We'll start out with a fun puzzle that's not directly related to
             machine learning but whose math will later help us.
             %
@@ -45,14 +59,14 @@
             wonder: how many pieces arise when a different number of people sit
             around the cake?
             %
-            \begin{figure}[h!]
+            \begin{marginfigure}
                 \centering
                 \includegraphics[height=3cm]{cake-4}
                 \caption{\emph{
                     With $n=4$ people, we make ${n\choose 2}=6$ cuts, which gives
                     $8$ pieces in total ($4$ outside and $4$ inside).  
                 }}
-            \end{figure}
+            \end{marginfigure}
 
             Here are some drawings for possibilities ranging from $n=1$ people
             to $n=6$ people.  Try counting the pieces and guessing a pattern!
@@ -96,7 +110,7 @@
             $16$!  How about $n=6$?  We expect $16+16=32$.  But --- uh oh! ---
             it seems that there are only $31$ pieces.  So the pattern breaks.
 
-        \subsection{An Explanation}
+        \section{An Explanation}
             Let's now figure out $p(n)$ for any $n$; along the way, we'll see
             why the powers-of-two pattern seemed to work until $n=6$.
             %
@@ -115,8 +129,8 @@
             %
             \begin{figure}[h!]
                 \centering
-                \includegraphics[height=3cm]{euler-a}
-                \includegraphics[height=3cm]{euler-b}
+                \includegraphics[height=2.7cm]{euler-a}
+                \includegraphics[height=2.7cm]{euler-b}
                 \caption{\emph{
                     Steps to build an example constellation (right) starting
                     from a single dot (left).
@@ -185,8 +199,8 @@
             of pieces equals the number of subsets of $n-1$ people with at most
             $4$ members.    
  
-    \section{Learning to Classify}
-        \subsection{What is Learning?}
+    \chapter{Learning to Classify}
+        \section{What is Learning?}
             Today, we'll analyze machines that learn to classify images into
             two possible buckets such as Cow and Dog.
             %Our discussion extends to more complicated situations, but we'll
@@ -212,12 +226,13 @@
             $\Ss \in (\Xx\times\Yy)^N$ drawn independently from $\Dd$.  So
             ``learning to classify'' means mapping $\Ss$s to $f$s.  In
             particular, an \textbf{algorithm} is a function
-            $\Ll:(\Xx\times\Yy)^N\to \Yy^{\Xx}$  
-
-            %By the way, we don't have to know $\Dd$ in order to apply our
-            %theory; we just named it in order to reason about it.  We'd like
-            %our machine to learn by pondering finitely many sample pairs drawn
-            %from $\Dd$.
+            $\Ll:(\Xx\times\Yy)^N\to \Yy^{\Xx}$.\footnote{ 
+                By the way, we don't have to know $\Dd$ in order to apply our
+                theory; we just named it in order to reason about it.
+                %We'd
+                %like our machine to learn by pondering finitely many sample
+                %pairs drawn from $\Dd$.
+            }
 
             Instead of considering all possible classifiers, we usually limit
             ourselves to some subset $\Hh \subseteq \Yy^{\Xx}$ of especially
@@ -234,8 +249,8 @@
                         and otherwise say Dog}
                 \}
             \end{align*}
-            In practice, $\Hh$ will actually be something like a set of neural
-            networks, which is a much bigger set.
+            In practice, $\Hh$ might actually be a much bigger set of neural
+            networks.
             %
             \begin{figure}[h!]
                 \centering
@@ -248,9 +263,10 @@
 
             An algorithm $\Ll$ is good when $\Ll(\Ss)$ accurately classifies
             images freshly drawn from $\Dd$.  Notice that this is different
-            from merely asking that $\Ll(\Ss) $accurately classifies the
+            from merely asking that $\Ll(\Ss)$ accurately classifies the
             elements of $\Ss$!  To notate this difference, we define the
-            \textbf{out-error} and \textbf{in-error} of a candidate $f \in \Hh$
+            \textbf{out-error} and \textbf{in-error} (also called the test and
+            train errors) of a candidate $f \in \Hh$
             as
             $$
                 \Ee_{\text{out}}(f) = \PP_{(x,y)\sim\Dd}   
@@ -289,13 +305,15 @@
             accurately classify test samples it has never before seen?
 
             Sometimes, the answer is \textbf{yes}.
-                If there is $1$ candidate $f\in \Hh$ and millions of
-                datapoints, then $\Ee_{\cdots}(\Ll) = \Ee_{\cdots}(f)$, then
+                If there is $1$ candidate $f\in \Hh$ and a thousand
+                datapoints, then $\Ee_{\cdots}(\Ll) = \Ee_{\cdots}(f)$, and
                 $\Ee_{\text{in},\Ss}(f)$ will very probably be very close to
-                $\Ee_{\text{out}}(f)$.  This is for the same reason that we
-                expect close to $16.6\%$ sixes among a million rolls of a fair
-                die. 
-            %
+                $\Ee_{\text{out}}(f)$.  A technical reason for this is that
+                $\Ll(\Ss)$ and $\Ss$ are independent, and we may apply the law
+                of large numbers.  It's as if we roll a fair die a thousand
+                times: we'd expect about a sixth of the rolls to land on
+                \epsdice{5}.
+
             Other times, the answer is \textbf{no}.
                 If every possible classifier is a candidate (so $\Hh$ is very
                 infinite) and only a few datapoints, then for any training
@@ -309,7 +327,14 @@
                 The problem (assuming each image appears with negligible chance
                 and that Cows occur with non-negligible chance) is $f$ will
                 misclassify every fresh image of a Cow as a Dog, so it will
-                have a huge out-error!
+                have a huge out-error!  It's as if we do a trillion experiments
+                where in each experiment we roll a fair die a thousand times:
+                in any one experiment, we'd expect about a sixth of the rolls
+                to land on \epsdice{5}, but if we focus on the experiment that
+                has the most \epsdice{5}s (which is like focusing on the
+                hypotheses that do the best on the training data), we are
+                likely to focus on an outlier that has disproportionately many
+                \epsdice{5}s!
 
             These two examples illustrate that $\Ll$'s training performance
             generalizes to test time when $\Ll$ uses lots of datapoints to
@@ -318,7 +343,7 @@
             How do these forces balance, for example if there are a lot of
             candidates and also a lot of datapoints?  Let's find out.
 
-        \subsection{Is Learning Possible?}
+        \section{Is Learning Possible?}
             Let's analyze the case $|\Hh|=1$ more closely.  We write $p$ as
             shorthand for $\Ee_{\text{out}}(f)$; then $\Ee_{\text{in},\Ss}$
             counts the fraction of heads that appear in $N$ independent flips
@@ -334,7 +359,7 @@
                     stick has three parts: \textbf{green} with length $1-p$,
                     \textbf{red} with length $p$, and \textbf{blue} with length
                     $g$.  We call non-blue points \textbf{boxed} and non-green
-                    points \textbf{white}.
+                    points \textbf{hollow}.
                 }}
             \end{figure}
 
@@ -350,25 +375,75 @@
                     & ~ \PP[\text{$M$ are red $\mid$ all are boxed}] \\
                   = & ~ \PP[\text{$M$ are red and all are boxed}] ~/~ 
                         \PP[\text{all are boxed}]  \\
-                  = & ~ \PP[\text{$M$ are white}] \cdot
-                        \PP[\text{all whites are red $\mid$ $M$ are white}] ~/~
+                  = & ~ \PP[\text{$M$ are hollow}] \cdot
+                        \PP[\text{all hollows are red $\mid$ $M$ are hollow}] ~/~
                         \PP[\text{all are boxed}] \\
-                  = & ~ \PP[\text{$M$ are white}] \cdot (1+g/p)^{-M} ~/~ (1+g)^{-N}  \\
-                \leq& ~ \PP[\text{$M$ are white}] \cdot (1+g/p)^{-M_0} ~/~ (1+g)^{-N} 
+                  = & ~ \PP[\text{$M$ are hollow}] \cdot (1+g/p)^{-M} ~/~ (1+g)^{-N}  \\
+                \leq& ~ \PP[\text{$M$ are hollow}] \cdot (1+g/p)^{-M_0} ~/~ (1+g)^{-N} 
             \end{align*}
             Since the above holds for all $M\geq M_0$, we conclude:
             \begin{align*}
                 ~   & ~ \PP[\text{at least $M_0$ are red $\mid$ all are boxed}] & \\
+                \leq& ~ \PP[\text{at least $M_0$ are hollow}] \cdot (1+g/p)^{-M_0} / (1+g)^{-N} \\ 
                 \leq& ~ (1+g/p)^{-M_0} / (1+g)^{-N}             & \text{probabilities are at most $1$} \\
-                \leq& ~ \exp(-M_0 g/p) \exp(Ng)                 & \text{$\exp$ is convex} \\ 
-                =   & ~ \exp(-(p+g)N g/p + Ng) = \exp(-Ng^2/p)  & \text{substitute $M_0=(p+g)N$} \\ 
+                \leq& ~ \exp(-M_0 g/p) \exp(Ng)                 & \text{$1+x\leq \exp(x)$} \\ 
+                =   & ~ \exp(-(p+g)N g/p + Ng)                  & \text{substitute $M_0=(p+g)N$} \\ 
+                =   & ~                          \exp(-Ng^2/p)  & \text{simplify}                \\ 
                 \leq& ~ \exp(-Ng^2)                             & \text{probabilities are at most $1$}
             \end{align*}
-            This is the \textbf{Chernoff bound} for coin flips.  We can say the
-            same thing in a different way by solving for $g$; we find that with
-            probability at most $\delta$ will the generalization gap exceed
-            $\sqrt{\log(1/\delta)/N}$.  Call this $\Gg(\delta)$.
+            This is the \textbf{Chernoff bound} for coin flips.\footnote{
+                There are lots of versions of this bound.  Google up 
+                ``multiplicative Chernoff bound'' or ``Bernstein inequality''
+                for some fun examples!
+            }
 
+            What have we learned?  We have learned that if we flip a fair coin
+            $N$ times, the odds of deviating by more than $1\%$ from the
+            expected value of $50\%$ heads decays very quickly with $N$!  Tying
+            back to learning, if hypothesis $f$ accurately classifies
+            $80\%$ of a large training set ($E_{\text{in},\Ss}=0.2$), then $f$
+            will probably accurately classify about $80\%$ of its test set
+            ($E_{\text{out}}\approx 0.2$).  For example, if there are $N=300$
+            training points, then the odds of $f$ suffering less than $70\%$
+            test accuracy are less than $$ \exp(-Ng^2) = \exp(-300 \cdot
+            10\%^2) \approx 5.0\% $$
+
+            Notice the exponential dependence on $N$!  Intuitively, exponential
+            dependencies are strong dependencies.  For example, if we add
+            $10^4$ to $N$, then we get
+            $$
+                \exp(-Ng^2) = \exp(-400 \cdot 10\%^2) \approx 1.8\%
+            $$
+            And if we add yet another $10^4$ to $N$, then we get
+            $$
+                \exp(-Ng^2) = \exp(-500 \cdot 1\%^2) \approx 0.67\%
+            $$
+            The chance of an inacceptable test accuracy decays
+            quickly with $N$.  Data is useful!
+
+            We can likewise play with $g$ instead of $N$.  Since $g$ is squared in the
+            formula, it can have a huge effect on the probability of success.
+            What if we think that a generalization gap of $g=10\%$ test
+            accuracy is too much?  For $g=8\%$, we find:
+            $$
+                \exp(-Ng^2) = \exp(-500 \cdot 6\%^2) \approx 4.1\%
+            $$
+            For $g=6\%$:
+            $$
+                \exp(-Ng^2) = \exp(-500 \cdot 6\%^2) \approx 16\%
+            $$
+            The chance of an inacceptable test accuracy increases very quickly
+            quickly as our notion of acceptability becomes more stringent.
+            Tolerance is useful!
+
+
+            Now, instead of trying different values of $g$, we might want to 
+            solve for $g$ in terms of a probability of failure that we name
+            $\delta$.  We find that with probability at most $\delta$ will the
+            generalization gap exceed $\sqrt{\log(1/\delta)/N}$.  Call this
+            $\Gg(\delta)$.
+  
+        \section{Multiple candidates}
             What if $\Hh$ contains multiple (say, $H$ many) candidates?
             Well, each candidate $f\in \Hh$ has
             $
@@ -409,101 +484,157 @@
             We proved this without knowing $\Dd$; we used simply that $\Dd$
             exists at all!  Ain't that cool?
 
-    \section{Structure in $\Hh$}
-        \subsection{Symmetrization}
-        \subsection{The Vapnik Chervonenkis Dimension}
+    %\chapter{Structure in $\Hh$}
+    %    \section{Symmetrization}
+    %    \section{The Vapnik Chervonenkis Dimension}
 
-    \section{Structure in $\Dd$}
-        \subsection{Rademacher Complexity}
-        \subsection{Margin Bounds}
+    %\chapter{Structure in $\Dd$}
+    %    \section{Rademacher Complexity}
+    %    \section{Margin Bounds}
 
-    \section{Structure in $\Ll$}
-        \subsection{Privacy and Generalization}
-        \subsection{The Akaike Information Criterion and its Cousins}
+    %\chapter{Structure in $\Ll$}
+    %    \section{Privacy and Generalization}
+    %    \section{The Akaike Information Criterion and its Cousins}
 
-    \section{Frame Conditions and Independence}
-        \subsection{Simplicity and Subjectivity}
-        \subsection{Independence in Practice?}
+    %\chapter{Frame Conditions and Independence}
+    %    \section{Simplicity and Subjectivity}
+    %    \section{Independence in Practice?}
 
-    \newpage
-    \section*{Helping Handout: Binomial Coefficients ${n \choose k}$}
-        How many ways can we select $k$ people out of $n$ people?
-        For example,
-        there is just $1$ way to choose a pair ($k=2$) from among $n=2$ people.
-        There are $3$ pairs among $n=3$ people.
-        And there are $6$ pairs among $n=4$ people.
-        We write the answer to this question as ${n\choose k}$; so
-        ${4\choose 2} = 6$. 
-        
-        While ${n\choose k}$ counts size-$k$ subsets, so that picking Alice 
-        and Bob is the same as picking Bob and Alice, we might want to count
-        ordered subsets.
-        How about if we want to order $k=4$ people out of $n=10$ people?
-        Well, there are $10$ ways to select the first person,
-                         $9$ ways to select the second person,
-                         $8$ ways to select the third person, and
-                         $7$ ways to select the fourth person.
-        So the answer is $10\cdot 9\cdot 8\cdot 7$.
-        But each size-$k$ unordered subset corresponds to
-        $4\cdot 3\cdot 2\cdot 1$ ordered subsets.  So we conclude that
-        $$
-            {10\choose 4} = \frac{10\cdot 9\cdot 8\cdot 7}{4\cdot 3\cdot 2\cdot 1} 
-        $$
+    %\newpage
+    %\chapter*{Helping Handout: Binomial Coefficients ${n \choose k}$}
+    %    How many ways can we select $k$ people out of $n$ people?
+    %    For example,
+    %    there is just $1$ way to choose a pair ($k=2$) from among $n=2$ people.
+    %    There are $3$ pairs among $n=3$ people.
+    %    And there are $6$ pairs among $n=4$ people.
+    %    We write the answer to this question as ${n\choose k}$; so
+    %    ${4\choose 2} = 6$. 
+    %    
+    %    While ${n\choose k}$ counts size-$k$ subsets, so that picking Alice 
+    %    and Bob is the same as picking Bob and Alice, we might want to count
+    %    ordered subsets.
+    %    How about if we want to order $k=4$ people out of $n=10$ people?
+    %    Well, there are $10$ ways to select the first person,
+    %                     $9$ ways to select the second person,
+    %                     $8$ ways to select the third person, and
+    %                     $7$ ways to select the fourth person.
+    %    So the answer is $10\cdot 9\cdot 8\cdot 7$.
+    %    But each size-$k$ unordered subset corresponds to
+    %    $4\cdot 3\cdot 2\cdot 1$ ordered subsets.  So we conclude that
+    %    $$
+    %        {10\choose 4} = \frac{10\cdot 9\cdot 8\cdot 7}{4\cdot 3\cdot 2\cdot 1} 
+    %    $$
 
-        Notice that ${n \choose 0} = 1$, since there is always exactly one way
-        to choose none of the $n$ people.
-        %
-        Also, when $n$ is positive, ${n\choose k} = {n-1\choose k-1} +
-        {n\choose k-1}$, since to choose $k$ folks from among a group of $n-1$
-        students and $1$ teacher, we can \textbf{either} choose $k$ students
-        and leave out the teacher \textbf{or} choose $k-1$ students and also
-        the teacher.
-        %
-        Another neat fact is that
-        $
-            {n\choose 0} + {n\choose 1} + {n\choose 2} + \cdots + {n\choose k}
-            = 2^n
-        $
-        as long as $n\leq k$.  This is because that sum
-        counts the number of ways to choose some subset of size at
-        most $k$ from among $n$ people.  
+    %    Notice that ${n \choose 0} = 1$, since there is always exactly one way
+    %    to choose none of the $n$ people.
+    %    %
+    %    Also, when $n$ is positive, ${n\choose k} = {n-1\choose k-1} +
+    %    {n\choose k-1}$, since to choose $k$ folks from among a group of $n-1$
+    %    students and $1$ teacher, we can \textbf{either} choose $k$ students
+    %    and leave out the teacher \textbf{or} choose $k-1$ students and also
+    %    the teacher.
+    %    %
+    %    Another neat fact is that
+    %    $
+    %        {n\choose 0} + {n\choose 1} + {n\choose 2} + \cdots + {n\choose k}
+    %        = 2^n
+    %    $
+    %    as long as $n\leq k$.  This is because that sum
+    %    counts the number of ways to choose some subset of size at
+    %    most $k$ from among $n$ people.  
 
-    \section*{Helping Handout: Asymptotics}
+    %\chapter*{Helping Handout: Asymptotics}
 
-    \section*{Helping Handout: Probability and Expectation}
-        How can we model the notion of \textbf{chance} using math?
-        For example, we might have a set $\Xx=[0\,\text{cm}, 50\,\text{cm}]$ of
-        possible daily rainfall levels.  Intuitively, there is zero chance that
-        any one particular rainfall level like $6.28318\cdots\,\text{cm}$ will
-        occur today.  But we'd say there is some chance that the rainfall will
-        fall within, say, $[6.2\,\text{cm}, 6.3\,\text{cm}]$.
-        %
-        Thus, in order to treat $\Xx$ probabilistically, we want to assign to
-        each interval $I \subseteq \Xx$ a nonnegative number $\PP(I)$ that
-        tells us the chance that rainfall will fall within $I$.  In order for
-        this bunch of numbers to make sense, we demand $\PP(\Xx)=1$ and that,
-        whenever a bunch of intervals $I_0, I_1, \cdots$ partition a bigger
-        interval $J$, then $\PP(I_0) + \PP(I_1) + \cdots = \PP(J)$.
-        By the way, it is convenient to think of $\PP$ as defined on unions of
-        disjoint intervals instead of intervals.
+    %\newpage
+    %\chapter*{Helping Handout: Probability}
+    %    How can we model the notion of \textbf{chance} using math?
+    %    For example, we might have a set $\Xx=[0\,\text{cm}, 50\,\text{cm}]$ of
+    %    possible daily rainfall levels.  Intuitively, there is zero chance that
+    %    any particular positive rainfall like $6.28318\cdots\,\text{cm}$ will
+    %    occur today.  But we'd say there is some chance that the rainfall will
+    %    fall within, say, $[6.2\,\text{cm}, 6.3\,\text{cm}]$.
+    %    %
+    %    Thus, in order to treat $\Xx$ probabilistically, we want to assign to
+    %    each interval $I \subseteq \Xx$ a nonnegative number $\PP(I)$ that
+    %    tells us the chance that rainfall will fall within $I$.  In order for
+    %    this bunch of numbers to make sense, we demand $\PP(\Xx)=1$ and that,
+    %    whenever a bunch of intervals $I_0, I_1, \cdots$ partition a bigger
+    %    interval $J$, then $\PP(I_0) + \PP(I_1) + \cdots = \PP(J)$.
+    %    By the way, it is convenient to think of $\PP$ as defined on unions of
+    %    disjoint intervals instead of intervals.
 
-        In general, we say that a \textbf{probability distribution} on a set
-        $\Xx$ is a bunch of ``generalized unions-of-intervals'' that are
-        subsets of $\Xx$, each labeled by a nonnegative number, that follows
-        the above demands.  Precisely, the data is: a collection $\Ii \subseteq
-        2^\Xx$ of subsets of $\Xx$ and a function $\PP:\Ii\to [0, 1]$, such
-        that the following are well-defined and true whenever $I, I_0, I_1,
-        \cdots \in \Ii$.
-        $$ 
-            \PP(\Xx - I) + \PP(I) = \PP(\Xx) = 1 
-        $$
-        and
-        $$
-            \PP(I_0) + \PP(I_1) + \cdots = \PP(I_0 \cup I_1 \cup \cdots)
-            ~ \text{when the $I$'s are disjoint}
-        $$
+    %    In general, a \textbf{probability distribution} on a set $\Xx$ is a
+    %    bunch of ``generalized unions-of-intervals'' of ``events'' that are subsets of $\Xx$,
+    %    each labeled by a nonnegative number, that
+    %    follows the above demands.  Precisely, the data is: a collection $\Ii
+    %    \subseteq 2^\Xx$ of subsets of $\Xx$ and a function $\PP:\Ii\to [0,
+    %    1]$, such that the following are well-defined and true whenever $I,
+    %    I_0, I_1, \cdots \in \Ii$.
+    %    $$ 
+    %        \PP(\Xx - I) + \PP(I) = \PP(\Xx) = 1 
+    %    $$
+    %    and
+    %    $$
+    %        \PP(I_0) + \PP(I_1) + \cdots = \PP(I_0 \cup I_1 \cup \cdots)
+    %        ~~~~~
+    %        \text{when the $I$'s are disjoint}
+    %    $$
 
-    \section*{Helping Handout: Vectors and Covectors}
+    %    One technique to understand complicated events is to break them up
+    %    into simpler events.  For example, it is intuitive that the chance that
+    %    a coin lands heads while a die lands sixes is related to the separate
+    %    chances that a coin lands heads and that a die lands sixes.  In particular,
+    %    we expect heads to occur $1/2$ of the time and sixes to occur $1/6$ of
+    %    the time, and thus both together to occur $(1/2) \cdot (1/6) = 1/12$ of
+    %    the time.  When simple events compose this way, we call them
+    %    \textbf{independent}:
+    %    $$
+    %        \PP(I_0 \cap I_1 \cap \cdots) = \PP(I_0) \cdot \PP(I_1) \cdot \cdots
+    %        ~~~~~
+    %        \text{when $I_0, I_1, \cdots$ are independent} 
+    %    $$
+    %    Events aren't always independent though.  In general, we may define
+    %    symbols $\PP(I | J)$ for the \textbf{conditional probability} that $I$
+    %    happens assuming that $J$ happens:
+    %    $$
+    %        \PP(I \cap J) = \PP(I | J)\cdot \PP(J)
+    %    $$
+    %    There is exactly one choice for $\PP(I|J)$ when $\PP(J)\neq 0$.
+    %    we may choose $\PP(I|J)=\PP(I)$ exactly when $I, J$ are independent.
+    %    %
+    %    Conditional probabilities formalize ``what if'' questions:
+    %    For example, what is the chance that of $\geq 2\,\text{cm}$ of rain
+    %    given $\geq 1\,\text{cm}$ of rain?  
+
+    %    \section*{Monty Hall}
+    %        Here's a practice example.  Imagine three boxes, exactly
+    %        one of which contains a prize.  We don't know which.
+    %        We play a game that has three steps: First, we pick a box.  Next, a
+    %        gameshow host removes one of the empty boxes that isn't the box we
+    %        picked.  Finally, we are allowed to pick one of the two remaining
+    %        boxes; it will either be our original box, or a different box.  If
+    %        this final pick contains the prize, then we win.
+
+    %        Here are three strategies we might use:
+    %        \textbf{stay} --- we pick the original box; or
+    %        \textbf{swap} --- we pick the different box; or
+    %        \textbf{flip} --- based on a flip of a fair coin, we pick the original or different box.
+
+    %        The \textbf{stay} strategy has a $1/3$ chance of winning, since 
+    %        playing the game with this strategy leads us to choose the prize
+    %        box as much as one empty box as much as the other empty box.
+
+    %        The \textbf{flip} strategy has a $1/2$ chance of winning, since 
+    %        playing the game with this strategy leads us to choose the prize
+    %        box as much as the empty remaining box.
+
+    %        And $\PP_{\textbf{flip}}(\text{win})$ is the average of 
+    %        $\PP_{\textbf{stay}}(\text{win})$ and
+    %        $\PP_{\textbf{swap}}(\text{win})$.
+    %        Therefore, the \textbf{swap} strategy has a $2/3$ chance of
+    %        winning.  It is by far the best.
+
+    %\chapter*{Helping Handout: Vectors and Covectors}
     
 \end{document}
 
