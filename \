@@ -504,22 +504,22 @@
             tiny changes in the parameters yield practically the same
             candidate.  
             %
-            Let's strive for a bound that depends on $\Hh$'s ``jaggedness''
+            So, let's strive for a bound that depends on $\Hh$'s ``jaggedness''
             instead of its literal size.
 
-            Even though $\Hh$
+            The crux is that, even though $\Hh$
             may be infinite, the candidates in $\Hh$ may classify any finite
             (train set $\Ss$ and) test set $\tilde\Ss$ in only finitely many
-            ways.\footnote{
+            ways.
+            %
+            So let us fix $f\in \Hh$ and replace $\Eout(f)$ by
+            $\Einb(f)$.\footnote{
                 Let $|\tilde\Ss|=|\Ss|=N$.  The train and test
                 sets are symmetrical, hence the section's name.
             }
-            %
-            So let us fix $f\in \Hh$ and replace $\Eout(f)$ by
-            $\Einb(f)$.
-            We may do this because $\Eout,\Einb$ are probably close: by Chernoff, 
-            $\Eout(f) \leq \Einb(f) + g/2$ with chance at least $1/2$
-            for reasonable values of $g$.\footnote{
+            By Chernoff, $\Eout(f), \Einb(f)$ are probably close:
+            $\PP[\Eout \leq \Einb + g/2]
+            \geq 1/2$ for reasonable values of $g$.\footnote{
                 Specifically, when $g$ is no smaller than $1/\sqrt{4N}$.  A gap
                 of $\approx 1/\sqrt{N}$ is the best we may hope for, since this
                 is the one-candidate gap for lenient $\delta$.
@@ -527,8 +527,8 @@
             \begin{align*}
                     ~& \PP[\Ein + g \leq \Eout]                                 &  \\
                 =   ~& \PP[\Ein + g \leq \Eout \mid \Eout \leq \Einb + g/2]     & \text{$\Ss,\tilde\Ss$ are independent} \\
-                \leq~& \PP[\Ein + g/2 \leq \Einb \mid \Eout \leq \Einb + g/2]   & \text{chain the inequalities} \\
-                \leq~& \PP[\Ein + g/2 \leq \Einb] \cdot 2                       & \text{$\Eout,\Einb$ are probably close}
+                \leq~& \PP[\Ein + g/2 \leq \Einb \mid \Eout \leq \Einb + g/2]   & \text{chain the $\leq$s} \\
+                \leq~& \PP[\Ein + g/2 \leq \Einb] \cdot 2                       & \text{probably $\Eout\approx\Einb$}
             \end{align*}
 
             Now let $f$ range over $\Hh_{\Ss\cup\tilde\Ss}$, the set of
