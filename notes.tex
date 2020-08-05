@@ -682,22 +682,35 @@
     \newpage
     \chapter{Linear classification}
         \section{Linear candidates}
-            We now develop a practical candidate class $\Hh$ and learning rule
-            $\Ll$.  The picture is that we cut the input space $\Xx=\RR^d$ into
-            two halves by a line or plane through the origin.  Here is a
-            convenient way to write this:
+            Today we will develop a practical candidate class $\Hh$ and
+            learning rule $\Ll$.  The picture is that we cut the input space
+            $\Xx=\RR^d$ into two halves by a line or plane through the origin
+            (Figure \ref{fig:linr}).
+            {\def\par{\let\par\endgraf}\begin{marginfigure}
+                \centering
+                \includegraphics[height=1.9cm]{db-linr-a}
+                \includegraphics[height=1.9cm]{db-linr-b}
+                \caption{\emph{
+                    Two $f$s in $\Hh_{\text{lin}}$.
+                    A line through the origin divides the plane ($\Xx=\RR^2$)
+                    into red (Cow) and blue (Dog) parts.  We also show how each
+                    $f$ classifies some random points.
+                }}
+                \label{fig:linr}
+            \end{marginfigure}}%
+            A convenient way to write $\Hh$ is in terms of linear functions $\theta$:
             $$
-                \Hh = \{
+                \Hh = \Hh_{\text{lin}} = \{
                     x \mapsto \text{sign}(\theta(x)) 
                     ~\text{where}~
                     \theta : \RR^d \to \RR
                     ~\text{is linear}
                 \}
             $$
-            Here, $\text{sign}$ sends negative numbers to Dog and
-            positive numbers to Cow.\footnote{
-                Let's not worry about the boundary case of zero.
-            }
+            Here, $\text{sign}$ sends negative numbers to Dog and positive
+            numbers to Cow.  Let's not worry about the boundary case of $0$
+            except to note that images on which $\theta$ is $0$ together
+            form a \textbf{decision boundary} between the Cows and the Dogs.
 
             The jaggedness of $\Hh$ is at most $d$, because any $d+1$ points
             $x_0, x_1,\cdots x_d \in \RR^d$ must participate in some linear
@@ -708,15 +721,73 @@
                 -
                 \sum_{j\in J} c_j x_j
             $$
+            {\def\par{\let\par\endgraf}\begin{marginfigure}
+                \centering
+                \includegraphics[height=1.9cm]{db-bias-a}
+                \includegraphics[height=1.9cm]{db-bias-b}
+                \caption{\emph{
+                    Decision boundaries with bias may avoid the origin.
+                }}
+                \label{fig:bias}
+            \end{marginfigure}}
             for some $\{s\},I,J$ mutually disjoint and each $c$ positive.
             Thus, if we assign to each $x_i$ a positive label (Cow) and to each
             $x_j$ a negative label (Dog), then $x_s$ must have a positive label
-            (Cow). 
-            Therefore, for large $N$ the gap will be small and it makes sense
-            to choose $f\in \Hh$ such that $\Ein(f)$ is small.  
+            (Cow).  Therefore, not all $2^d$ possibilities occur.  As long
+            as $\sqrt{\log(N)\cdot d/N}$ is small, learning with
+            $\Hh_{\text{lin}}$ will generalize.
 
-            Before we consider how to find such an $f$, let's understand what
-            $\Hh$ looks like.
+            \begin{marginfigure}
+                \centering
+                \includegraphics[height=3.0cm]{transform-two-three}
+                \caption{\emph{
+                    Linear planes (bottom) in the transformed $\Xx$ induce
+                    non-linear boundaries (top) in the old $\Xx$.
+                }}
+            \end{marginfigure}
+            By the way, what if lines through the origin don't make
+            sense for our classification problem?  For example, what if we want
+            to model decision boundaries that don't pierce the origin?
+            Well, one trick is to pre-process the data so that linear
+            classification of the transformed data corresponds to richer
+            classification of the old data.  If we map
+            $$
+                \text{old features} = (a,b)
+                \mapsto
+                \text{new features} = (1, a, b)
+            $$
+            {\def\par{\let\par\endgraf}\begin{marginfigure}
+                \centering
+                \includegraphics[height=1.9cm]{db-cubc-a}
+                \includegraphics[height=1.9cm]{db-cubc-b}
+                \caption{\emph{
+                    Polynomial features allow decision boundaries to exhibit
+                    peninsulas, channels, and islands.
+                }}
+                \label{fig:cubc}
+            \end{marginfigure}}%
+            then boundaries may avoid the origin (Figure
+            \ref{fig:bias}).  This is called ``adding a \textbf{bias} term''.
+            Instead of classifying points in $\Xx=\RR^2$, we now classify
+            points in $\Xx=\RR^3$, meaning that our jaggedness is $3$ instead
+            of $2$ and generalization may be a bit worse.
+            %
+
+            The same trick helps us enrich the class of candidates beyond
+            straight lines.  For example, we might featurize using
+            polynomials: 
+            $$
+                \text{old features} = (a, b)
+                \mapsto
+                \text{new features} = (1, a, b, a^2, ab, b^2, a^3, a^2b, ab^2, b^3)
+            $$
+            to get decision boundaries as in Figure \ref{fig:cubc}.
+            Instead of classifying points in $\Xx=\RR^2$, we
+            now classify points in $\Xx=\RR^{10}$, meaning that our jaggedness
+            is $10$ instead of $2$ and generalization may be substantially
+            worse.
+
+
 
             \newpage
         \section{Optimization}
