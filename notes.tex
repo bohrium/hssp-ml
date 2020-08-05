@@ -1,6 +1,6 @@
 \documentclass[openany, notitlepage, justified]{tufte-book}
 \usepackage{amsmath, amssymb, amsthm, bm}
-\usepackage{graphicx, epsdice, xcolor}
+\usepackage{graphicx, epsdice, xcolor, listings}
 
 \geometry{                                                                      
     height=11.0in,                                                              
@@ -747,10 +747,12 @@
                     non-linear boundaries (top) in the old $\Xx$.
                 }}
             \end{marginfigure}
-            By the way, what if lines through the origin don't make
-            sense for our classification problem?  For example, what if we want
+            By the way, what if
+            %lines through the origin don't make
+            %sense for our classification problem?  For example, what if
+            we want
             to model decision boundaries that don't pierce the origin?
-            Well, one trick is to pre-process the data so that linear
+            Well, one trick is to \textbf{pre-process} the data so that linear
             classification of the transformed data corresponds to richer
             classification of the old data.  If we map
             $$
@@ -765,9 +767,8 @@
             of $2$ and generalization may be a bit worse.
             %
 
-            The same trick helps us enrich the class of candidates beyond
-            straight lines.  For example, we might featurize using
-            polynomials: 
+            The same trick gives us curvy boundaries.
+            For example, we might use polynomials
             $$
                 \text{old features} = (a, b)
                 \mapsto
@@ -793,10 +794,9 @@
 
             \newpage
         \section{Optimization}
-            Now, how do we select $f\in \Hh_{\text{lin}}$ based on the data
-            $\Ss$?  Since the jaggedness $d$ is finite, we expect that given
-            enough data, the test and train error will be very close.  So it
-            makes sense to (approximately) minimize the training error:
+            How do we select $f\in \Hh_{\text{lin}}$ based on the data
+            $\Ss$?  Since the jaggedness $d$ is finite, it makes sense to
+            seek an $f$ with low training error:
             $$
                 N \cdot \Ein(\theta) =
                     \sum_{(x,\text{Cow})\in \Ss}
@@ -814,27 +814,29 @@
             Now, a general strategy to find a good $f$ is to start with some
             $f$ and to keep replacing it with better $f$'s.
             %
-            The problem is that $\Ein(f)$ takes discrete values $0/N$, $1/N$,
-            $\cdots$, $N/N$, so it is hard to tell in which direction we should
-            nudge $f$ to improve it.
+            The problem is that each point is either misclassified or not,
+            so we don't have a very gradual notion of improvement.
+            %The problem is that $\Ein(f)$ takes discrete values $0/N$, $1/N$,
+            %$\cdots$, $N/N$, so it is hard to tell in which direction we should
+            %nudge $f$ to improve it.
 
-            Imagine that the true label might be Cow, meaning that we want
-            $\theta(x)>0$, but that the current guess for $\theta$  has
-            $\theta(x) = -0.20$.  In some sense, $\theta(x)=-0.15$ is an
+            Imagine the true label is Cow, so we want
+            $\theta(x)>0$, but currently
+            $\theta(x) = -0.20$.  Intuitively, $\theta(x)=-0.15$ is an
             improvement, even though it is still a misclassification.
-            Likewise, $\theta(x)=+0.05$ is precariously close to being
-            negative, even though it is currently a correct classification.
+            Likewise, $\theta(x)=+0.05$ is precariously close to
+            negative.
             Therefore, let's take small steps to improve a notion
             of \textbf{badness} according to which $-0.20$ is
             worse than $-0.15$ is worse than $0.05$ is worse than $1.00$.  At
-            some point, we consider the classification safe instead of precarious,
-            so let's say that $1.00$ is no worse than $1.05$.
+            some point, we consider $\theta(x)$ safe instead of precarious;
+            let's say $1.00$ is no worse than $1.05$.
             %
-            Turning this into a formula, we get:\footnote{
+            We write this as a formula:\footnote{
                 There are lots of ways to turn the qualitative pattern we 
                 discussed into a formula.  What we present is called
-                \textbf{hinge loss}.  Our favorite is called \textbf{logistic
-                loss}, because it has a beautiful probabilistic interpretation,
+                \textbf{hinge loss}.  Our favorite way, \textbf{logistic
+                loss}, has a beautiful probabilistic interpretation,
                 but we won't have time to talk about it.
             }
             \begin{align*}
@@ -853,17 +855,18 @@
                     \end{cases}
             }
             \end{align*}
-            Notice that each term of $\text{badness}$ is at least the
-            corresponding term for $N\cdot \Ein$.  Minimizing badness thus
+            Each term of $\text{badness}$ exceeds the
+            corresponding term of $N\cdot \Ein$.  Minimizing badness thus
             makes sense as an approximate way to minimize $\Ein$.
 
-            The upshot is that we can make incremental improvements with small
-            steps.  What's the difference between
+            %The upshot is that we can make incremental improvements with small
+            %steps.
+            What's the difference between
             $\text{badness}(\theta)$ and 
             $\text{badness}(\theta+\epsilon)$, where $\epsilon$ is a ``small''
             linear function?
             %
-            Each of the ``$+1-\theta(x)$'' terms of increases by
+            Each of the non-zero terms changes by
             $\epsilon(x)$ when we change $\theta$ into $\theta+\epsilon$.  
             So the net decrease in badness is:\footnote{
                 Well, actually this isn't exactly right, since whether we use
@@ -888,49 +891,75 @@
                     \\
                 &=
                     \epsilon\left(
+                        +
                         \sum_{\substack{(x,\text{Cow})\in \Ss \\ \text{and}~\theta(x)<+1}} x
                         -
                         \sum_{\substack{(x,\text{Dog})\in \Ss \\ \text{and}~\theta(x)>-1}} x
                     \right)
                 = \epsilon(x_{\text{squeaky}})
             \end{align*}
-            Above, we used linearity of $\epsilon$ and then renamed its input
+            Above, we used $\epsilon$'s linearity then renamed its input
             $x_{\text{squeaky}}$ to save ink.\footnote{
                 After all, each term in $x_{\text{squeaky}}$ is
                 (or is precariously close to being) 
                 misclassified.
                 And you know what they say: \emph{the squeaky wheel gets the grease}.
             }
-            How shall we choose a small linear function
-            $\epsilon$ that makes an improvement?  There are lots of choices,
-            and each leads to a different algorithm.  If we write out input
-            data in coordinates, like $x = (x_a,x_b,x_c, \cdots)$, then one way is
-            to define:
-            $$
-                \epsilon(y) = 0.03 \cdot x_a y_a + 0.02 \cdot x_b y_b +
-                                0.01 \cdot x_a y_b + 0.01 \cdot x_c y_c + \cdots
-            $$
-            We chose small coefficients to ensure that $\epsilon$ is ``small'',
-            and as long as the coefficients of the cross terms like $0.01 \cdot x_a
-            y_b$ are close to $0$, this formula will guarantee that the
-            improvement  $\epsilon(x_{\text{squeaky}})$ is positive.
+
+            So for every possible value of the vector $x_{\text{squeaky}}$,
+            want to find some $\epsilon = \eta(x_{\text{squeaky}})$ such that
+            the improvement $\approx \epsilon(x_{\text{squeaky}}) =
+            \eta(x_{\text{squeaky}})(x_{\text{squeaky}})$ is positive.
+            A large
+            class of useful $\eta$s are the \textbf{inner products}.
+            Different inner products will select different $f$s from among the
+            tied best $f$s.
+
+            %            Overall, our algorithm looks like: 
+            %            \begin{lstlisting}[mathescape, basicstyle=\ttfamily]
+            %    Initialize $\theta$ to $0$
+            %    Repeat many times:
+            %        Use the current $\theta$ to classify the training data
+            %        Add up the misclassified points to get $x_{\text{squeaky}}$
+            %        Update $\theta$ to $\theta + \eta(x_{\text{squeaky}})$
+            %            \end{lstlisting}
+
+
+            %How shall we choose a small linear function
+            %$\epsilon$ that makes an improvement?  There are lots of choices,
+            %and each leads to a different algorithm.  If we write out input
+            %data in coordinates, like $x = (x_a,x_b,x_c, \cdots)$, then one way is
+            %to define:
+            %$$
+            %    \epsilon(y) = 0.03 \cdot x_a y_a + 0.02 \cdot x_b y_b +
+            %                    0.01 \cdot x_a y_b + 0.01 \cdot x_c y_c + \cdots
+            %$$
+            %We chose small coefficients to ensure that $\epsilon$ is ``small'',
+            %and as long as the coefficients of the cross terms like $0.01 \cdot x_a
+            %y_b$ are close to $0$, this formula will guarantee that the
+            %improvement  $\epsilon(x_{\text{squeaky}})$ is positive.
 
     \newpage
-    \chapter{Regularization}
-        %\section{Rademacher complexity}
-        %\section{Margin bounds}
+    \chapter{Example: Classifying Boots and T-shirts}
+        \section{Featurization}
+        \section{Learning Curves}
 
-    \chapter{Structure in $\Dd$}
-        \section{Rademacher Complexity}
-        \section{Margin Bounds}
+    %\newpage
+    %\chapter{Regularization}
+    %    %\section{Rademacher complexity}
+    %    %\section{Margin bounds}
 
-    \chapter{Structure in $\Ll$}
-        \section{Privacy and Generalization}
-        \section{The Akaike Information Criterion and its Cousins}
+    %\chapter{Structure in $\Dd$}
+    %    \section{Rademacher Complexity}
+    %    \section{Margin Bounds}
 
-    \chapter{Frame Conditions and Independence}
-        \section{Simplicity and Subjectivity}
-        \section{Independence in Practice?}
+    %\chapter{Structure in $\Ll$}
+    %    \section{Privacy and Generalization}
+    %    \section{The Akaike Information Criterion and its Cousins}
+
+    %\chapter{Frame Conditions and Independence}
+    %    \section{Simplicity and Subjectivity}
+    %    \section{Independence in Practice?}
 
 
 
