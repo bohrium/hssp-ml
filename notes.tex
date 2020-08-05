@@ -521,9 +521,9 @@
             We may do this because $\Eout,\Einb$ are probably close: by Chernoff, 
             $\Eout(f) \leq \Einb(f) + g/2$ with chance at least $1/2$
             for reasonable values of $g$.\footnote{
-                Specifically, when $g$ is no smaller than $1/\sqrt{4N}$.  A gap
+                Specifically, when $g$ is no smaller than $2/\sqrt{N}$.  A gap
                 of $\approx 1/\sqrt{N}$ is the best we may hope for, since this
-                is the one-candidate gap for lenient $\delta$.
+                is the one-candidate gap for lenient $\delta$.   
             }
             \begin{align*}
                     ~& \PP[\Ein + g \leq \Eout]                                 &  \\
@@ -533,7 +533,8 @@
             \end{align*}
 
             Now let $f$ range over $\Hh_{\Ss\cup\tilde\Ss}$, the set of
-            restricted candidates.  Then:
+            candidates \textbf{restricted} to $\Ss\cup\tilde\Ss$.
+            Then:
             \begin{align*}
                 \PP[g \leq \Ee_{\text{gap}}(\Ll(\Ss))]
                 \leq~& \PP[\Ein(\Ll(\Ss)) + g/2 \leq \Einb(\Ll(\Ss))] \cdot 2 \\
@@ -549,7 +550,7 @@
                 \exp(-Ng^2/16)
             $.
             Likewise, there are at most $H(2N)$ many terms if $H(2N)$ is the
-            biggest possible size $\Hh_{\Ss\cup\tilde\Ss}$ can be given that
+            biggest possible size of $\Hh_{\Ss\cup\tilde\Ss}$ given that
             $|\Ss\cup\tilde\Ss|=2N$.  So:
             $$
                 \cdots \leq H(2N) \cdot \exp(-Ng^2/16) \cdot 2
@@ -791,21 +792,132 @@
 
             \newpage
         \section{Optimization}
+            Now, how do we select $f\in \Hh_{\text{lin}}$ based on the data
+            $\Ss$?  Since the jaggedness $d$ is finite, we expect that given
+            enough data, the test and train error will be very close.  So it
+            makes sense to (approximately) minimize the training error:
+            $$
+                N \cdot \Ein(\theta) =
+                    \sum_{(x,\text{Cow})\in \Ss}
+                    \begin{cases} 
+                        1       &       \text{if}~\theta(x) < 0 \\
+                        0       &       \text{otherwise}
+                    \end{cases}
+                    + 
+                    \sum_{(x,\text{Dog})\in \Ss}
+                    \begin{cases} 
+                        1       &       \text{if}~\theta(x) > 0 \\
+                        0       &       \text{otherwise}
+                    \end{cases}
+            $$
+            Now, a general strategy to find a good $f$ is to start with some
+            $f$ and to keep replacing it with better $f$'s.
+            %
+            The problem is that $\Ein(f)$ takes discrete values $0/N$, $1/N$,
+            $\cdots$, $N/N$, so it is hard to tell in which direction we should
+            nudge $f$ to improve it.
 
-            Now, how do we find $f$?  A general strategy is to start with
-            some $f$ and to keep replacing it with better $f$'s.
+            Imagine that the true label might be Cow, meaning that we want
+            $\theta(x)>0$, but that the current guess for $\theta$  has
+            $\theta(x) = -0.20$.  In some sense, $\theta(x)=-0.15$ is an
+            improvement, even though it is still a misclassification.
+            Likewise, $\theta(x)=+0.05$ is precariously close to being
+            negative, even though it is currently a correct classification.
+            Therefore, let's take small steps to improve a notion
+            of \textbf{badness} according to which $-0.20$ is
+            worse than $-0.15$ is worse than $0.05$ is worse than $1.00$.  At
+            some point, we consider the classification safe instead of precarious,
+            so let's say that $1.00$ is no worse than $1.05$.
+            %
+            Turning this into a formula, we get:\footnote{
+                There are lots of ways to turn the qualitative pattern we 
+                discussed into a formula.  What we present is called
+                \textbf{hinge loss}.  Our favorite is called \textbf{logistic
+                loss}, because it has a beautiful probabilistic interpretation,
+                but we won't have time to talk about it.
+            }
+            \begin{align*}
+                \text{badness}(\theta) = 
+            {\small
+                    \sum_{(x,\text{Cow})\in \Ss}
+                    \begin{cases} 
+                        +1-\theta(x)    &   \text{if}~\theta(x) < +1 \\
+                        0               &   \text{otherwise}
+                    \end{cases}
+                    +
+                    \sum_{(x,\text{Dog})\in \Ss}
+                    \begin{cases} 
+                        -1+\theta(x)    &   \text{if}~\theta(x) > -1\\
+                        0               &   \text{otherwise}
+                    \end{cases}
+            }
+            \end{align*}
+            Notice that each term of $\text{badness}$ is at least the
+            corresponding term for $N\cdot \Ein$.  Minimizing badness thus
+            makes sense as an approximate way to minimize $\Ein$.
 
-            The problem is that $\Ein(f)$ takes discrete values $0/N, 1/N,
-            \cdots, N/N$, so it is hard to tell which direction to nudge $f$ to
-            make it better.
-
-            Instead, we 
+            The upshot is that we can make incremental improvements with small
+            steps.  What's the difference between
+            $\text{badness}(\theta)$ and 
+            $\text{badness}(\theta+\epsilon)$, where $\epsilon$ is a ``small''
+            linear function?
+            %
+            Each of the ``$+1-\theta(x)$'' terms of increases by
+            $\epsilon(x)$ when we change $\theta$ into $\theta+\epsilon$.  
+            So the net decrease in badness is:\footnote{
+                Well, actually this isn't exactly right, since whether we use
+                the ``ifs'' of the ``otherwises'' might change between $\theta$
+                and $\theta + \epsilon$.  We imagine that $\epsilon$ is so
+                small that this is negligible.  That's what we mean by ``small'',
+                and that's why we write $\approx$ instead of $=$.
+            }
+            \begin{align*}
+                \text{improvement}
+                &\approx
+                    \sum_{(x,\text{Cow})\in \Ss}
+                    \begin{cases} 
+                        \epsilon(x)      &       \text{if}~\theta(x) < +1 \\
+                        0                &       \text{otherwise}
+                    \end{cases}
+                    +\sum_{(x,\text{Dog})\in \Ss}
+                    \begin{cases} 
+                        -\epsilon(x)     &       \text{if}~\theta(x) > -1\\
+                        0                &       \text{otherwise}
+                    \end{cases}
+                    \\
+                &=
+                    \epsilon\left(
+                        \sum_{\substack{(x,\text{Cow})\in \Ss \\ \text{and}~\theta(x)<+1}} x
+                        -
+                        \sum_{\substack{(x,\text{Dog})\in \Ss \\ \text{and}~\theta(x)>-1}} x
+                    \right)
+                = \epsilon(x_{\text{squeaky}})
+            \end{align*}
+            Above, we used linearity of $\epsilon$ and then renamed its input
+            $x_{\text{squeaky}}$ to save ink.\footnote{
+                After all, each term in $x_{\text{squeaky}}$ is
+                (or is precariously close to being) 
+                misclassified.
+                And you know what they say: \emph{the squeaky wheel gets the grease}.
+            }
+            How shall we choose a small linear function
+            $\epsilon$ that makes an improvement?  There are lots of choices,
+            and each leads to a different algorithm.  If we write out input
+            data in coordinates, like $x = (x_a,x_b,x_c, \cdots)$, then one way is
+            to define:
+            $$
+                \epsilon(y) = 0.03 \cdot x_a y_a + 0.02 \cdot x_b y_b +
+                                0.01 \cdot x_a y_b + 0.01 \cdot x_c y_c + \cdots
+            $$
+            We chose small coefficients to ensure that $\epsilon$ is ``small'',
+            and as long as the coefficients of the cross terms like $0.01 \cdot x_a
+            y_b$ are close to $0$, this formula will guarantee that the
+            improvement  $\epsilon(x_{\text{squeaky}})$ is positive.
 
     \newpage
-    \chapter{Structure in $\Dd$}
+    \chapter{Regularization}
         \section{Rademacher complexity}
         \section{Margin bounds}
-            {\bf KERNELS!}
 
     %\chapter{Structure in $\Dd$}
     %    \section{Rademacher Complexity}
