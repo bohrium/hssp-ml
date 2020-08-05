@@ -1,6 +1,6 @@
 \documentclass[openany, notitlepage, justified]{tufte-book}
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage{graphicx, epsdice}
+\usepackage{amsmath, amssymb, amsthm, bm}
+\usepackage{graphicx, epsdice, xcolor}
 
 \geometry{                                                                      
     height=11.0in,                                                              
@@ -18,6 +18,7 @@
 
 \newcommand{\EE}{\mathbb{E}}
 \newcommand{\PP}{\mathbb{P}}
+\newcommand{\RR}{\mathbb{R}}
 %
 \newcommand{\Dd}{\mathcal{D}}
 \newcommand{\Ee}{\mathcal{E}}
@@ -472,13 +473,13 @@
             then learning is possible: with enough training data, we can ensure
             the generalization gap is small.
 
-            For example, suppose we train a model that has $10^3$
+            For example, suppose we train a neural net that has $10^4$
             parameters, each represented by $32$ bits.  Since
-            there are $2^{32}$ values for each parameter, $H \leq 2^{32\cdot 10^3}$.
-            If we train on $10^6$ images, then with probability $99\%=1-10^{-2}$,
+            there are $2^{32}$ values for each parameter, $H \leq 2^{32\cdot 10^4}$.
+            If we train on $10^7$ images, then with probability $99\%=1-10^{-2}$,
             the gap is less than
             $$
-                \sqrt{\log(2^{32\cdot 10^3}/10^{-2})/10^6}
+                \sqrt{\log(2^{32\cdot 10^4}/10^{-2})/10^7}
                 \approx 15\%
             $$
             So if the neural net's train accuracy is $97\%$,
@@ -535,9 +536,9 @@
             restricted candidates.  Then:
             \begin{align*}
                 \PP[g \leq \Ee_{\text{gap}}(\Ll(\Ss))]
-                \leq~& \PP[\Ein(\Ll(\Ss)) + g/2 \leq \Einb(\Ll(\Ss))] \\
-                \leq~& \sum_{f\in \Hh|_{\Ss\cup\tilde\Ss}} \PP[\Ein(f) + g/2 \leq \Einb(f)] \\
-                =   ~& \sum_{f\in \Hh|_{\Ss\cup\tilde\Ss}} \PP[\Ein(f) + g/4 \leq \Einc(f)]
+                \leq~& \PP[\Ein(\Ll(\Ss)) + g/2 \leq \Einb(\Ll(\Ss))] \cdot 2 \\
+                \leq~& \sum_{f\in \Hh|_{\Ss\cup\tilde\Ss}} \PP[\Ein(f) + g/2 \leq \Einb(f)] \cdot 2 \\
+                =   ~& \sum_{f\in \Hh|_{\Ss\cup\tilde\Ss}} \PP[\Ein(f) + g/4 \leq \Einc(f)] \cdot 2
             \end{align*}
             In the final line above, we noted $\Einc$ is the average of
             $\Ein$ and $\Einb$.  Now, imagine $\Ss$ as sampled \emph{without
@@ -551,7 +552,7 @@
             biggest possible size $\Hh_{\Ss\cup\tilde\Ss}$ can be given that
             $|\Ss\cup\tilde\Ss|=2N$.  So:
             $$
-                \cdots \leq H(2N) \cdot \exp(-Ng^2/16)
+                \cdots \leq H(2N) \cdot \exp(-Ng^2/16) \cdot 2
             $$
             To bound the chance the gap isn't small,
             we just have to bound $H(2N)$.
@@ -574,29 +575,34 @@
             $s\in S$, we write $\blacksquare$ for the $+$ version.  Otherwise,
             we write $\square$.
 
-            \newcommand{\rR}[1]{{\color{red}#1}}
-            \newcommand{\gG}[1]{{\color{green}#1}}
-            \newcommand{\bB}[1]{{\color{blue}#1}}
+            \definecolor{moor}{rgb}{0.85,0.1 ,0.1 }
+            \definecolor{moog}{rgb}{0.1 ,0.75,0.1 }
+            \definecolor{moob}{rgb}{0.1 ,0.1 ,0.9 }
+            \newcommand{\rR}[1]{{\color{moor}#1}}
+            \newcommand{\gG}[1]{{\color{moog}#1}}
+            \newcommand{\bB}[1]{{\color{moob}#1}}
             \newcommand{\E}{\texttt{$\square$}}
             \newcommand{\D}{\texttt{$\blacksquare$}}
-            \newcommand{\A}{\texttt{$\mathbf+$}}
-            \newcommand{\M}{\texttt{$\mathbf-$}}
-            \begin{figure}
+            \newcommand{\A}{\texttt{$\bm{+}$}}
+            \newcommand{\M}{\texttt{$\bm{-}$}}
+            \begin{figure}[h]
                 \centering
                 \begin{tabular}{ccccccccc}
-                       \A \M \M \M  &       &  \E \gG\M \M \M  &       &  \E \E \gG\M \M  &       &  \E \E \E \rR\M  &       &  \E \E \E \E  \\
+                       \A \M \M \M  &       &  \E \gG\M \M \M  &       &  \E \E \rR\M \M  &       &  \E \E \E \rR\M  &       &  \E \E \E \E  \\
                        \M \A \M \M  &       &  \E \gG\A \M \M  &       &  \E \D    \M \M  &       &  \E \D \E \bB\M  &       &  \E \D \E \E  \\
-                       \M \M \A \M  &       &  \E    \M \A \M  &       &  \E \E \gG\A \M  &       &  \E \E \D \gG\M  &       &  \E \E \D \E  \\
-                       \M \M \M \A  & $\to$ &  \E    \M \M \A  & $\to$ &  \E \E \rR\M \A  & $\to$ &  \E \E \E \rR\A  & $\to$ &  \E \E \E \D  \\
-                       \M \M \A \A  &       &  \E \rR\M \A \A  &       &  \E \E \rR\A \A  &       &  \E \E \D \gG\A  &       &  \E \E \D \D  \\
-                    \rR\M \A \A \A  &       &  \E \rR\A \A \A  &       &  \E \D    \A \A  &       &  \E \D \E \bB\A  &       &  \E \D \E \D  \\
-                    \rR\A \A \A \A  &       &  \D    \A \A \A  &       &  \D \E    \A \A  &       &  \D \E \E    \A  &       &  \D \E \E \E 
+                       \M \M \A \M  &       &  \E    \M \A \M  &       &  \E \E \rR\A \M  &       &  \E \E \D \gG\M  &       &  \E \E \D \E  \\
+                       \M \M \M \A  & $\to$ &  \E    \M \M \A  & $\to$ &  \E \E \gG\M \A  & $\to$ &  \E \E \E \rR\A  & $\to$ &  \E \E \E \D  \\
+                       \M \M \A \A  &       &  \E \bB\M \A \A  &       &  \E \E \gG\A \A  &       &  \E \E \D \gG\A  &       &  \E \E \D \D  \\
+                    \rR\M \A \A \A  &       &  \E \bB\A \A \A  &       &  \E \D    \A \A  &       &  \E \D \E \bB\A  &       &  \E \D \E \D  \\
+                    \rR\A \A \A \A  &       &  \D    \A \A \A  &       &  \D \E    \A \A  &       &  \D \E \E    \A  &       &  \D \E \E \E
                 \end{tabular}
                 \caption{
                     Translating from restrictions of candidates (left) to
                     strings of choice points (right).  Each row corresponds to
                     one of $7$ candidates 
                     and each column corresponds to one of of $4$ datapoints.
+                    %
+                    We color pairs of strings that differ in exactly one coordinate.
                 }
             \end{figure}
 
@@ -630,9 +636,10 @@
 
             Plugging this all in, we find that
             $
-               \PP[g \leq \Ee_{\text{gap}}(\Ll(\Ss))]
-               \leq
-               (2N+2)^k \cdot \exp(-Ng^2/16)
+               g \leq \Ee_{\text{gap}}(\Ll(\Ss))
+            $ with chance at most
+            $
+               (2N+2)^k \cdot \exp(-Ng^2/16) \cdot 2
             $.
             We can solve for the gap in terms of our tolerance $\delta$.
             If we call the (smallest) $k$ for which $H(k+1) \neq 2^{k+1}$
@@ -649,15 +656,22 @@
             $$
                 \text{gap}
                 \leq
-                \sqrt{\frac{16\log(2N+2) \cdot \text{jaggedness} + 16\log(1/\delta)}{N}}
+                \sqrt{\frac{16\log(2N+2) \cdot \text{jaggedness} + 16\log(2/\delta)}{N}}
             $$
-            In short, huge --- even infinite --- classes $\Hh$ of candidates
-            can generalize, so long as they are not very jagged.
+
+            Here's an example.  Consider classifying rainfall levels as
+            ``desert'' or ``non-desert'' according to how they compare to
+            some positive real number $r$.  Each $r$ gives a different
+            candidate, so there are infinitely many candidates.  But for any
+            $k=2$ rainfall levels $a<b$, no candidate classifies $a$ but not
+            $b$ as ``desert''.  So $\Hh$ has jaggedness $2-1=1$.
             %
-            In (common) cases where the jaggedness counts the parameters and 
-            the $\delta$ term is negligible, we have
-            simply replaced $32 \cdot \log(2)$ by $16\log(2N+2) \approx
-            \log(N)$.  Intuitively, each parameter has $\approx \log(N)$ bits
+            In cases like these, where the jaggedness counts the parameters, we
+            have essentially replaced the $32$ (bits per parameter) by $\approx
+            \log(N)$.\footnote{
+                Due to the constants involved, this is in practice not a
+                substantial improvement.
+            } Intuitively, each parameter has $\approx \log(N)$ bits
             relevant to distinguishing the datapoints; further bits are
             irrelevant to overfitting.
 
@@ -665,14 +679,62 @@
             Unless $\Hh$ is infinitely jagged, the gap will shrink as $N$
             grows.  In this case, learning from data is possible.
 
-            %Here's an example.  Consider classifying points in 
-            %the plane according to which side of a line they fall.  The set
-            %$\Hh$ is the set of lines in the plane marked with a $+$-side and a
-            %$-$-side.  Then $H(4) \neq 2^4$, so the jaggedness is at most $4$.
-
+    \newpage
     \chapter{Linear classification}
-        \section{Logistic linear optimization}
-        \section{Classifying clothing}
+        \section{Linear candidates}
+            We now develop a practical candidate class $\Hh$ and learning rule
+            $\Ll$.  The picture is that we cut the input space $\Xx=\RR^d$ into
+            two halves by a line or plane through the origin.  Here is a
+            convenient way to write this:
+            $$
+                \Hh = \{
+                    x \mapsto \text{sign}(\theta(x)) 
+                    ~\text{where}~
+                    \theta : \RR^d \to \RR
+                    ~\text{is linear}
+                \}
+            $$
+            Here, $\text{sign}$ sends negative numbers to Dog and
+            positive numbers to Cow.\footnote{
+                Let's not worry about the boundary case of zero.
+            }
+
+            The jaggedness of $\Hh$ is at most $d$, because any $d+1$ points
+            $x_0, x_1,\cdots x_d \in \RR^d$ must participate in some linear
+            relation:
+            $$
+                x_s = 
+                \sum_{i\in I} c_i x_i
+                -
+                \sum_{j\in J} c_j x_j
+            $$
+            for some $\{s\},I,J$ mutually disjoint and each $c$ positive.
+            Thus, if we assign to each $x_i$ a positive label (Cow) and to each
+            $x_j$ a negative label (Dog), then $x_s$ must have a positive label
+            (Cow). 
+            Therefore, for large $N$ the gap will be small and it makes sense
+            to choose $f\in \Hh$ such that $\Ein(f)$ is small.  
+
+            Before we consider how to find such an $f$, let's understand what
+            $\Hh$ looks like.
+
+            \newpage
+        \section{Optimization}
+
+            Now, how do we find $f$?  A general strategy is to start with
+            some $f$ and to keep replacing it with better $f$'s.
+
+            The problem is that $\Ein(f)$ takes discrete values $0/N, 1/N,
+            \cdots, N/N$, so it is hard to tell which direction to nudge $f$ to
+            make it better.
+
+            Instead, we 
+
+    \newpage
+    \chapter{Structure in $\Dd$}
+        \section{Rademacher complexity}
+        \section{Margin bounds}
+            {\bf KERNELS!}
 
     %\chapter{Structure in $\Dd$}
     %    \section{Rademacher Complexity}
@@ -824,6 +886,91 @@
 
     %\chapter*{Helping Handout: Vectors and Covectors}
     
+%        \section{Cross entropy}
+%
+%            Suppose we know a selfish expert who knows the true probability $p$   
+%            of a hurricane happening this month.  We want to incentivize the
+%            expert to tell us $p$ beforehand.  The expert tells us
+%            some number $\hat p$ when we ask them, and we want to penalize them
+%            at the end of the month so that it is in their best interests to
+%            say the true $p$.
+%
+%            Ideally, we would reward the expert according to whether $\hat p$
+%            matches the true $p$.  The problem is, even at the end of the
+%            month, we won't know the true $p$!  All we know is whether or not a
+%            hurricane happened --- this is related to $p$ but not the same.
+%            So we want some reward functions
+%            $l_{\text{wet}}(\hat p)$ and
+%            $l_{\text{dry}}(\hat p)$ 
+%            to be handed out depending on whether a hurricane happens.
+%            Hmm... is this even possible?
+%
+%            Yes!  The marvelous miracle is that the following reward functions
+%            work!
+%            $$
+%                l_{\text{wet}}(\hat p,\hat q) = \log(\hat p)~\text{dollars}
+%                ~~~~~
+%                ~~~~~
+%                ~~~~~
+%                l_{\text{dry}}(\hat p,\hat q) = \log(\hat q)~\text{dollars}
+%            $$
+%
+%            Here's one way to see this.  The reward after $N$ independent
+%            trials over will be around $Np \log(\hat p) + Nq \log(\hat q)$,
+%            which is:
+%            $$
+%                \log( \hat p^{Np} \cdot \hat q^{Nq} )
+%            $$
+%            The quantity inside the $\log$ is just the probability that, if
+%            we flip a $\hat p$-biased coin $N$ times, then we see $Np$ heads
+%            in a row and then $Nq$ tails in a row.  It is intuitive that the
+%            value of $\hat p$ that makes this outcome most likely is
+%            $\hat p = p$.
+%
+%            In fact, if we don't count silly variations,\footnote{
+%                namely, scaling (using cents instead of dollars) and shifting
+%                (gifting an extra amount that doesn't depend
+%                on $\hat p, \hat q$)
+%            } the above penalty system is the unique one that works!
+
+%            What we do instead is to consider candidates that estimate the
+%            probability of being a Cow rather than estimate an absolute label:
+%            $$
+%                \Hh = \{
+%                    x \mapsto (\exp(\theta(x))\text{-to-}1~\text{odds of Cow})
+%                    ~\text{where}~
+%                    \theta : \RR^d \to \RR
+%                    ~\text{is linear}
+%                \}
+%            $$
+%            From the point of view of $f\in \Hh$, the likelihood of a datapoint
+%            $x$ being labeled Dog (or Cow) is
+%            $
+%                1/(\exp(\theta(x)) + 1)
+%            $ (or one minus that).  And the likelihood of the training set
+%            overall is a big product of likelihoods.  It is reasonable to shift
+%            our goals to maximize this likelihood rather than $\Ein$.  Since
+%            likelihood varies smoothly as $\theta$ varies, we may start with an
+%            arbitrary $\theta\in \Hh$ and then take small steps, each time
+%            finding a slightly different $\theta$ from whose perspective the
+%            fixed training data is more likely.
+%
+%            Let's see how this works in more detail.  If we have
+%            $3$ datapoints $(x,Cow), (y,Dog), (z,Dog)$, then the likelihood is
+%            $$
+%                L = 
+%                \frac{\exp(\theta(x))}{\exp(\theta(x)) + 1}
+%                \cdot
+%                \frac{1}{\exp(\theta(y)) + 1}
+%                \cdot
+%                \frac{1}{\exp(\theta(y)) + 1}
+%            $$
+%            Now if we change $\theta$ to $\theta+\epsilon$ for some small
+%            linear function $\epsilon$, then $\exp((\theta+\epsilon))(x)$  
+
+
+
+
 \end{document}
 
 
