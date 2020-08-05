@@ -69,7 +69,7 @@
                 \centering
                 \includegraphics[height=3cm]{cake-4}
                 \caption{\emph{
-                    With $n=4$ people, we make ${n\choose 2}=6$ cuts, which gives
+                    With $n=4$ people, we make ${n\choose 2}=6$ cuts.  We get
                     $8$ pieces in total ($4$ outside and $4$ inside).  
                 }}
             \end{marginfigure}
@@ -572,13 +572,13 @@
             %
             The idea is that $\blacksquare$ represents ``surprisingly $+$''.
             More precisely, we translate left to right.  Whenever two
-            (partially translated) strings differ in exactly one coordinate
-            $s\in S$, we write $\blacksquare$ for the $+$ version.  Otherwise,
-            we write $\square$.
+            (partially translated) strings differ \textbf{only} in their
+            leftmost untranslated coordinate, we overwrite the $+$ version's
+            $+$ by $\blacksquare$.  Otherwise, we overwrite by $\square$.
 
             \definecolor{moor}{rgb}{0.85,0.1 ,0.1 }
             \definecolor{moog}{rgb}{0.1 ,0.75,0.1 }
-            \definecolor{moob}{rgb}{0.1 ,0.1 ,0.9 }
+            \definecolor{moob}{rgb}{0.2 ,0.4 ,1.0 }
             \newcommand{\rR}[1]{{\color{moor}#1}}
             \newcommand{\gG}[1]{{\color{moog}#1}}
             \newcommand{\bB}[1]{{\color{moob}#1}}
@@ -608,22 +608,23 @@
             \end{figure}
 
             Observe that each step of this process keeps distinct strings
-            distinct.  So there will be as many untranslated strings as
-            translated strings.
+            distinct.  So there will be as many translated strings as
+            original strings.
             %
             Moreover, whenever some $k$ indices of a translated string are
             $\blacksquare$s, then at those $k$ points in $S$, the
-            of candidates attain all $2^k$ configurations.  This is
+            candidates attain all $2^k$ configurations.  This is
             because $\blacksquare$s mark choice points where the candidates
             attain both $+$ and $-$.
             %
-            Therefore, \textbf{either} $H(n)=2^n$ for all $n$,
+            Now, \textbf{either} $H(n)=2^n$ for all $n$,
             \textbf{or} $H(k) \neq 2^k$ for some $k$.  In the latter 
             case, no translated string may have $k$ or more
             $\blacksquare$s.  So $\Hh_S$ contains at most
-            $
-                {n\choose 0} + {n\choose 1} + \cdots + {n\choose k-1}
-            $
+            as many strings are there are subsets of $S$ of size $<k$.
+            %$
+            %    {n\choose 0} + {n\choose 1} + \cdots + {n\choose k-1}
+            %$
             many strings.  We conclude that
             $$
                 H(n)
@@ -687,6 +688,15 @@
             learning rule $\Ll$.  The picture is that we cut the input space
             $\Xx=\RR^d$ into two halves by a line or plane through the origin
             (Figure \ref{fig:linr}).
+            A convenient way to write $\Hh$ is in terms of linear functions $\theta$:
+            $$
+                \Hh = \Hh_{\text{lin}} = \{
+                    x \mapsto \text{sign}(\theta(x)) 
+                    ~\text{where}~
+                    \theta : \RR^d \to \RR
+                    ~\text{is linear}
+                \}
+            $$
             {\def\par{\let\par\endgraf}\begin{marginfigure}
                 \centering
                 \includegraphics[height=1.9cm]{db-linr-a}
@@ -699,15 +709,6 @@
                 }}
                 \label{fig:linr}
             \end{marginfigure}}%
-            A convenient way to write $\Hh$ is in terms of linear functions $\theta$:
-            $$
-                \Hh = \Hh_{\text{lin}} = \{
-                    x \mapsto \text{sign}(\theta(x)) 
-                    ~\text{where}~
-                    \theta : \RR^d \to \RR
-                    ~\text{is linear}
-                \}
-            $$
             Here, $\text{sign}$ sends negative numbers to Dog and positive
             numbers to Cow.  Let's not worry about the boundary case of $0$
             except to note that images on which $\theta$ is $0$ together
@@ -757,16 +758,6 @@
                 \mapsto
                 \text{new features} = (1, a, b)
             $$
-            {\def\par{\let\par\endgraf}\begin{marginfigure}
-                \centering
-                \includegraphics[height=1.9cm]{db-cubc-a}
-                \includegraphics[height=1.9cm]{db-cubc-b}
-                \caption{\emph{
-                    Polynomial features allow decision boundaries to exhibit
-                    peninsulas, channels, and islands.
-                }}
-                \label{fig:cubc}
-            \end{marginfigure}}%
             then boundaries may avoid the origin (Figure
             \ref{fig:bias}).  This is called ``adding a \textbf{bias} term''.
             Instead of classifying points in $\Xx=\RR^2$, we now classify
@@ -782,6 +773,16 @@
                 \mapsto
                 \text{new features} = (1, a, b, a^2, ab, b^2, a^3, a^2b, ab^2, b^3)
             $$
+            {\def\par{\let\par\endgraf}\begin{marginfigure}
+                \centering
+                \includegraphics[height=1.9cm]{db-cubc-a}
+                \includegraphics[height=1.9cm]{db-cubc-b}
+                \caption{\emph{
+                    Polynomial features allow decision boundaries to exhibit
+                    peninsulas, channels, and islands.
+                }}
+                \label{fig:cubc}
+            \end{marginfigure}}%
             to get decision boundaries as in Figure \ref{fig:cubc}.
             Instead of classifying points in $\Xx=\RR^2$, we
             now classify points in $\Xx=\RR^{10}$, meaning that our jaggedness
@@ -916,20 +917,20 @@
 
     \newpage
     \chapter{Regularization}
-        \section{Rademacher complexity}
-        \section{Margin bounds}
+        %\section{Rademacher complexity}
+        %\section{Margin bounds}
 
-    %\chapter{Structure in $\Dd$}
-    %    \section{Rademacher Complexity}
-    %    \section{Margin Bounds}
+    \chapter{Structure in $\Dd$}
+        \section{Rademacher Complexity}
+        \section{Margin Bounds}
 
-    %\chapter{Structure in $\Ll$}
-    %    \section{Privacy and Generalization}
-    %    \section{The Akaike Information Criterion and its Cousins}
+    \chapter{Structure in $\Ll$}
+        \section{Privacy and Generalization}
+        \section{The Akaike Information Criterion and its Cousins}
 
-    %\chapter{Frame Conditions and Independence}
-    %    \section{Simplicity and Subjectivity}
-    %    \section{Independence in Practice?}
+    \chapter{Frame Conditions and Independence}
+        \section{Simplicity and Subjectivity}
+        \section{Independence in Practice?}
 
 
 
