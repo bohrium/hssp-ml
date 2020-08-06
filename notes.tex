@@ -944,18 +944,20 @@
         \section{Featurizing and learning}
             \begin{figure}[h]
                 \centering
-                \includegraphics[height=3.2cm]{yo-15-0012-soft-10}
-                \includegraphics[height=3.2cm]{yo-15-0012-soft-100}
-                \includegraphics[height=3.2cm]{yo-15-0012-soft-1000}
-                \includegraphics[height=3.2cm]{yo-15-0012-soft-10000}
+                \includegraphics[height=4.2cm]{yo-28-0012-soft-10}
+                \includegraphics[height=4.2cm]{yo-28-0012-soft-1000}
+                \includegraphics[height=4.2cm]{yo-28-0012-soft-10000}
                 \\
-                \includegraphics[height=3.2cm]{yo-15-0012-hard-10}
-                \includegraphics[height=3.2cm]{yo-15-0012-hard-100}
-                \includegraphics[height=3.2cm]{yo-15-0012-hard-1000}
-                \includegraphics[height=3.2cm]{yo-15-0012-hard-10000}
+                \includegraphics[height=4.2cm]{yo-28-0012-hard-10}
+                \includegraphics[height=4.2cm]{yo-28-0012-hard-1000}
+                \includegraphics[height=4.2cm]{yo-28-0012-hard-10000}
                 \caption{\emph{
-                    Polynomial features allow decision boundaries to exhibit
-                    peninsulas, channels, and islands.
+                    Here, we train a $d=28$ model on $N=12$ datapoints for
+                    (from left to right) $10^1$, $10^3$, or $10^4$ many
+                    steps.  As training progresses, the decision boundary
+                    increasingly precisely conforms to the data.
+                    \textbf{Top}:    the decision function $\theta(x)$.
+                    \textbf{Bottom}: the prediction $\text{sign}(\theta(x))$. 
                 }}
             \end{figure}
 
@@ -964,26 +966,48 @@
 
             \begin{figure}[h]
                 \centering
-                \includegraphics[height=3.2cm]{yo-03-0012-hard-10000}
-                \includegraphics[height=3.2cm]{yo-03-0096-hard-10000}
-                \includegraphics[height=3.2cm]{yo-15-0012-hard-10000}
-                \includegraphics[height=3.2cm]{yo-15-0096-hard-10000}
+                \includegraphics[height=4.2cm]{yo-02-0012-hard-10000}
+                \includegraphics[height=4.2cm]{yo-02-0096-hard-10000} \\
+                \includegraphics[height=4.2cm]{yo-28-0012-hard-10000}
+                \includegraphics[height=4.2cm]{yo-28-0096-hard-10000}
                 \caption{\emph{
-                    Polynomial features allow decision boundaries to exhibit
-                    peninsulas, channels, and islands.
+                    A $d=2$ model (top) is simple enough to generalize well from
+                    scarce data (top left), but too simple to fit a large 
+                    training set (top right).  
+                    A $d=28$ model (bottom) is too complex to generalize well
+                    from scarce data (bottom left), but is complex enough to
+                    fit a large training set (bottom right).
+                    \textbf{Top row}: $d=2$.
+                    \textbf{Bottom row}: $d=28$.
+                    \textbf{Left column}: $N=12$.
+                    \textbf{Right column}: $N=96$.
+                    \textbf{All}: we train for $10^4$ steps.
                 }}
             \end{figure}
 
             \begin{figure}[h]
                 \centering
-                \includegraphics[height=4.2cm]{yoyo-15-0012}
-                \includegraphics[height=4.2cm]{yoyoyo-0012}
+                \includegraphics[height=5.2cm]{yoyo-28-0012}
+                \includegraphics[height=5.2cm]{yoyoyo-0012}
                 \caption{\emph{
-                    Polynomial features allow decision boundaries to exhibit
-                    peninsulas, channels, and islands.
+                    \textbf{Left}: 
+                    each training step decreases badness, resulting eventually
+                    in low training error.  However, the generalization gap 
+                    increases as the model increasingly overfits to the data.
+                    Here, $N=12$ and $d=15$.
+                    %
+                    \textbf{Right}: 
+                    as the dimension $d$ increases, the model becomes more
+                    complex and thus better able to overfit to data.  Thus, 
+                    the training error decreases even as the test error 
+                    increases past $d=4$.
+                    Here, $N=12$.
+                    %
+                    \textbf{Blue}:   test error.
+                    \textbf{Red}:    training error.
+                    \textbf{Yellow}: badness.
                 }}
             \end{figure}
-
 
 
     %\newpage

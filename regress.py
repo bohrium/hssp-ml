@@ -45,14 +45,16 @@ def plot_data(N, clothes, x_axis, y_axis, text, color):
     plt.text(np.mean(X)-0.3, np.mean(Y), text, color=color, fontdict=fd)
 
 def preprocess(x,y):
-    x = 4*x-2
-    y = 4*y-2
+    x = 3*x-1.5
+    y = 3*y-1.5
     return (
         1.0+0*x,
-        x, y,
+        y, x,
         x*x, x*y, y*y,
         x*x*x, x*x*y, x*y*y, y*y*y,
         x*x*x*x, x*x*x*y, x*x*y*y, x*y*y*y, y*y*y*y,
+        x*x*x*x*x, x*x*x*x*y, x*x*x*y*y, x*x*y*y*y, x*y*y*y*y, y*y*y*y*y,
+        x*x*x*x*x*x, x*x*x*x*x*y, x*x*x*x*y*y, x*x*x*y*y*y, x*x*y*y*y*y, x*y*y*y*y*y, y*y*y*y*y*y
     )[:d]
 
 features = None 
@@ -112,13 +114,14 @@ def save_plot(file_name):
 
 
 for NN in [12, 24, 48,96]:
-    dds = list(range(1,15+1))
+    N = NN
+
+    dds = list(range(1,28+1)) if N==12 else [2,3,6,10,21,28]
     tests = []
     bads = []
     trains = []
     for dd in dds:
         d = dd
-        N = NN
 
         features = {
             'tops':  np.array([ preprocess(x,y) for x,y in zip(backgrounds[tops  ][:N], asymmetries[tops  ][:N])]),
@@ -153,7 +156,7 @@ for NN in [12, 24, 48,96]:
             err_tests.append(e_test)
         
             if step not in [10, 100, 1000, 10000]: continue
-            if (d,N) not in ((3,12), (15, 12), (3, 96), (15, 96)): continue
+            if (d,N) not in ((2,12), (28, 12), (2, 96), (28, 96)): continue
         
             print('badness {:6.2f}% ... accuracy {:3.0f}% ... theta {:s}'.format(
                 100*bb, 100*e_test, ' '.join('{:+2.0f}'.format(xx) for xx in theta)
@@ -192,7 +195,7 @@ for NN in [12, 24, 48,96]:
     plt.plot(dds, np.array(bads), c='orange')
     plt.ylim(([0.0, 0.5]))
     plt.yticks(([0.0, 0.2, 0.4]))
-    plt.xticks(([1,3,6,10,15]))
+    plt.xticks(([1,3,6,10,15,21,28]))
     plt.xlabel('data dimension after preprocessing', fontdict=fd)
     plt.gca().spines['right'].set_visible(False)
     plt.gca().spines['top'].set_visible(False)
