@@ -42,7 +42,7 @@ styles = {
 def plot_data(N, clothes, x_axis, y_axis, text, color):
     X, Y = x_axis[clothes][:N], y_axis[clothes][:N]
     plt.scatter(X, Y, **styles[color])
-    plt.text(np.mean(X), np.mean(Y), text, color=color, fontdict=fd)
+    plt.text(np.mean(X)-0.3, np.mean(Y), text, color=color, fontdict=fd)
 
 def preprocess(x,y):
     x = 4*x-2
@@ -96,6 +96,11 @@ def save_plot(file_name):
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.0])
 
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['left'].set_visible(False)
+    plt.gca().spines['bottom'].set_visible(False)
+
     plt.xlabel('percent background', fontdict=fd)
     plt.ylabel('asymmetry', fontdict=fd)
     plt.gca().set_aspect('equal')
@@ -106,7 +111,7 @@ def save_plot(file_name):
     plt.clf()
 
 
-for NN in [12, 24, 48]:
+for NN in [12, 24, 48,96]:
     dds = list(range(1,15+1))
     tests = []
     bads = []
@@ -132,7 +137,7 @@ for NN in [12, 24, 48]:
         theta = np.zeros(len(preprocess(0,0)))
 
         step = 0
-        while step != 5000:
+        while step != 10000:
             theta = theta + 0.01 * squeaky()
             step += 1
             
@@ -147,25 +152,26 @@ for NN in [12, 24, 48]:
             err_trains.append(e_train)
             err_tests.append(e_test)
         
-            if step not in [10, 200, 4000]: continue
-            if (d,N) not in ((10, 12), (3, 48), (15, 48)): continue
+            if step not in [10, 100, 1000, 10000]: continue
+            if (d,N) not in ((3,12), (15, 12), (3, 96), (15, 96)): continue
         
             print('badness {:6.2f}% ... accuracy {:3.0f}% ... theta {:s}'.format(
-                100*bb, 100*e_train, ' '.join('{:+2.0f}'.format(xx) for xx in theta)
+                100*bb, 100*e_test, ' '.join('{:+2.0f}'.format(xx) for xx in theta)
             ))
         
             for db in [True, False]:
                 plot_data(N, tops  ,  backgrounds, asymmetries, 'tops', 'red')
                 plot_data(N, bottoms, backgrounds, asymmetries, 'bottoms', 'blue')
                 plot_class(db)
-                plt.text(0.02, 0.95, 'after {:3d} steps'.format(step), fontdict=fd)
+                plt.text(0.02, 0.95, 'after {:3d} steps, accuracy {:.1f}%'.format(
+                    step, 100*(1.0-e_test)), fontdict=fd)
                 save_plot('yo-{:02d}-{:04d}-{:s}-{:02d}.png'.format(d, N, ['soft','hard'][db], step))
         
         bads.append(badnesses[-1])
         trains.append(err_trains[-1])
         tests.append(err_tests[-1])
 
-        if N != 12 or d not in (3, 6,10,15,28): continue
+        if N != 12 or d not in (3,6,10,15,28): continue
         plt.plot(np.array(steps), err_tests , c='blue')
         plt.plot(np.array(steps), err_trains, c='red')
         plt.plot(np.array(steps), badnesses , c='orange')
@@ -173,17 +179,24 @@ for NN in [12, 24, 48]:
         plt.ylim([0.0, 0.5])
         plt.yticks([0.0, 0.2, 0.4])
         plt.xlabel('(log) number of optimization updates', fontdict=fd)
+        plt.gca().spines['right'].set_visible(False)
+        plt.gca().spines['top'].set_visible(False)
+
         plt.tight_layout()
         plt.savefig('yoyo-{:02d}-{:04d}.png'.format(d,N))
         plt.clf()
 
     plt.plot(dds, np.array(trains), c='red')
     plt.plot(dds, np.array(tests), c='blue')
+    plt.plot(dds, 0*np.array(tests) + min(tests), c='blue', linestyle='dashed')
     plt.plot(dds, np.array(bads), c='orange')
     plt.ylim(([0.0, 0.5]))
     plt.yticks(([0.0, 0.2, 0.4]))
     plt.xticks(([1,3,6,10,15]))
     plt.xlabel('data dimension after preprocessing', fontdict=fd)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['top'].set_visible(False)
+
     plt.tight_layout()
     plt.savefig('yoyoyo-{:04d}.png'.format(N))
     plt.clf()
