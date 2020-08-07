@@ -952,8 +952,8 @@
                 \includegraphics[height=4.2cm]{yo-10-0016-hard-100}
                 \includegraphics[height=4.2cm]{yo-10-0016-hard-10000}
                 \caption{\emph{
-                    Here, we train a $d=28$ model on $N=15$ datapoints for
-                    (from left to right) $10^1$, $10^3$, or $10^4$ many
+                    We train a $d=10$ model on $N=2\cdot 16$ datapoints for
+                    (left to right) $10^1$, $10^2$, or $10^4$ many
                     steps.  As training progresses, the decision boundary
                     increasingly precisely conforms to the data.
                     \textbf{Top}:    the decision function $\theta(x)$.
@@ -981,29 +981,31 @@
                     %
                     \textbf{Top row}: $d=2$.
                     \textbf{Bottom row}: $d=28$.
-                    \textbf{Left column}: $N=2$.
-                    \textbf{Right column}: $N=64$.
+                    \textbf{Left column}: $N=2\cdot 2$.
+                    \textbf{Right column}: $N=2\cdot 64$.
                     \textbf{All}: we train for $10^4$ steps.
                 }}
             \end{figure}
 
             \begin{figure}[h]
                 \centering
-                \includegraphics[height=5.2cm]{yoyo-28-0016}
-                \includegraphics[height=5.2cm]{yoyoyo-0016}
+                \includegraphics[height=4.2cm]{yoyo-28-0008}
+                \includegraphics[height=4.2cm]{yoyoyo-0008}
                 \caption{\emph{
                     \textbf{Left}: 
                     each training step decreases badness, resulting eventually
                     in low training error.  However, the generalization gap 
                     increases as the model increasingly overfits to the data.
-                    Here, $N=16$ and $d=28$.
+                    Here, $d=28$.
                     %
                     \textbf{Right}: 
                     as the dimension $d$ increases, the model becomes more
-                    complex and thus better able to overfit to data.  Thus, 
-                    the training error decreases even as the test error 
-                    increases past $d=9$.
-                    Here, $N=16$.
+                    complex and thus better able to overfit to data.  Thus, the
+                    training error decreases even as (past $d=5$) the test
+                    error increases.
+                    %
+                    \textbf{Both}:  
+                    $N=2\cdot 8$.
                     %
                     \textbf{Blue}:   test error.
                     \textbf{Red}:    training error.

@@ -62,8 +62,8 @@ def preprocess(x,y):
 
 features = None 
 test_features = None 
+theta = None
 
-theta = np.zeros(len(preprocess(0,0)))
 def classify(data):
     return np.dot(data, theta)
 
@@ -118,70 +118,88 @@ def save_plot(file_name):
     plt.clf()
 
 
-for NN in [2, 16, 64]:
+for NN in [2,8,16,64]:
+    print('!')
     N = NN
 
-    dds = list(range(1,28+1)) if N==16 else [2,3,6,10,21,28]
+    dds = list(range(1,28+1)) if N==8 else [2,10,28]
     tests = []
     bads = []
     trains = []
     for dd in dds:
+        print(dd,'... ')
         d = dd
 
-        features = {
-            'tops':  np.array([ preprocess(x,y) for x,y in zip(backgrounds[tops  ][:N], asymmetries[tops  ][:N])]),
-            'bottoms':np.array([preprocess(x,y) for x,y in zip(backgrounds[bottoms][:N], asymmetries[bottoms][:N])]),
-        }
-        TEST = 5000
-        test_features = {
-            'tops':  np.array([ preprocess(x,y) for x,y in zip(backgrounds[tops  ][-TEST:], asymmetries[tops  ][-TEST:])]),
-            'bottoms':np.array([preprocess(x,y) for x,y in zip(backgrounds[bottoms][-TEST:], asymmetries[bottoms][-TEST:])]),
-        }
-
-        steps = []
         badnesses = []
         err_trains = []
         err_tests = []
-        
-        theta = np.zeros(len(preprocess(0,0)))
-
-        step = 0
-        while step != 10000:
-            theta = theta + 0.01 * squeaky()
-            step += 1
+ 
+        for offset in range(0,100 * (10 if N==8 else 1),100):
+            print(offset, '\033[1A')
+            features = {
+                'tops':  np.array([ preprocess(x,y) for x,y in zip(backgrounds[tops  ][offset:][:N], asymmetries[tops  ][offset:][:N])]),
+                'bottoms':np.array([preprocess(x,y) for x,y in zip(backgrounds[bottoms][offset:][:N], asymmetries[bottoms][offset:][:N])]),
+            }
+            TEST = 5000
+            test_features = {
+                'tops':  np.array([ preprocess(x,y) for x,y in zip(backgrounds[tops  ][-TEST:], asymmetries[tops  ][-TEST:])]),
+                'bottoms':np.array([preprocess(x,y) for x,y in zip(backgrounds[bottoms][-TEST:], asymmetries[bottoms][-TEST:])]),
+            }
+    
+            steps = []
+            badnesses_inner = []
+            err_trains_inner = []
+            err_tests_inner = []
+ 
+            theta = np.zeros(len(preprocess(0,0)))
+    
+            step = 0
+            while step != 10000:
+                theta = theta + 0.01 * squeaky()
+                step += 1
+                
+                if step % 200 and step not in [10,100, 1,2,4,16,64,256]: continue
             
-            if step % 25 and step not in [10, 1,2,4,8,16,32,64,128,256]: continue
-        
-            bb = badness()
-            e_train = 1.0 - accuracy()
-            e_test  = 1.0 - accuracy(test=True)
-        
-            steps.append(step)
-            badnesses.append(bb)
-            err_trains.append(e_train)
-            err_tests.append(e_test)
-        
-            if step not in [1, 10, 100, 10000]: continue
-            if (d,N) not in ((2,2), (2, 64), (10, 16), (28,2), (28, 64)): continue
-        
-            print('badness {:6.2f}% ... accuracy {:3.0f}% ... theta {:s}'.format(
-                100*bb, 100*e_test, ' '.join('{:+2.0f}'.format(xx) for xx in theta)
-            ))
-        
-            for db in [True, False]:
-                plot_data(N, tops  ,  backgrounds, asymmetries, 'tops', 'red')
-                plot_data(N, bottoms, backgrounds, asymmetries, 'bottoms', 'blue')
-                plot_class(db)
-                plt.text(0.02, 0.88, 'after {:3d} steps\ntest acc {:.0f}%'.format(
-                    step, 100*(1.0-e_test)), fontdict=fd)
-                save_plot('yo-{:02d}-{:04d}-{:s}-{:02d}.png'.format(d, N, ['soft','hard'][db], step))
-        
+                bb = badness()
+                e_train = 1.0 - accuracy()
+                e_test  = 1.0 - accuracy(test=True)
+            
+                steps.append(step)
+                badnesses_inner.append(bb)
+                err_trains_inner.append(e_train)
+                err_tests_inner.append(e_test)
+            
+                if offset: continue 
+                if step not in [1, 10, 100, 10000]: continue
+                if (d,N) not in ((2,2), (2, 64), (10,16), (28,2), (28, 64)): continue
+            
+                print('badness {:6.2f}% ... test err {:3.0f}% ... theta {:s}'.format(
+                    100*bb, 100*e_test, ' '.join('{:+5.2f}'.format(xx) for xx in theta)
+                ))
+            
+                for db in [True, False]:
+                    plot_data(N, tops  ,  backgrounds, asymmetries, 'tops', 'red')
+                    plot_data(N, bottoms, backgrounds, asymmetries, 'bottoms', 'blue')
+                    plot_class(db)
+                    plt.text(0.02, 0.88, 'after {:3d} steps\ntest acc {:.0f}%'.format(
+                        step, 100*(1.0-e_test)), fontdict=fd)
+                    save_plot('yo-{:02d}-{:04d}-{:s}-{:02d}.png'.format(d, N, ['soft','hard'][db], step))
+
+            badnesses.append(badnesses_inner)
+            err_trains.append(err_trains_inner)
+            err_tests.append(err_tests_inner)
+
+        badnesses = np.mean(np.array(badnesses), axis=0)   #+ 0.001 
+        err_trains = np.mean(np.array(err_trains), axis=0) #+ 0.001 
+        err_tests = np.mean(np.array(err_tests), axis=0)   #+ 0.001 
+            
         bads.append(badnesses[-1])
         trains.append(err_trains[-1])
         tests.append(err_tests[-1])
 
-        if N != 16 or d not in (3,6,10,15,28): continue
+        if N != 8 or d not in (3,6,10,15,21,28): continue
         steps = np.array(steps)
+
         plt.plot(steps, err_tests , c='blue')
         plt.plot(steps, err_trains, c='red')
         plt.plot(steps, badnesses , c='orange')
@@ -191,8 +209,15 @@ for NN in [2, 16, 64]:
         plt.plot([steps[best_idx], steps[best_idx]], [0.0     , best_val], c='blue', linestyle='dashed')
 
         plt.xscale('log')
-        plt.ylim([0.0, 0.1])
+        plt.xlim([1, max(steps)])
+
+        #plt.yscale('log')
+        #plt.ylim([0.05, 0.2])
+        #plt.yticks([0.05, 0.2])
+        plt.ylim([0.0, 0.15])
         plt.yticks([0.0, 0.1])
+
+        plt.ylabel('error', fontdict=fd)
         plt.xlabel('(log) number of optimization updates', fontdict=fd)
         plt.gca().spines['right'].set_visible(False)
         plt.gca().spines['top'].set_visible(False)
@@ -201,24 +226,31 @@ for NN in [2, 16, 64]:
         plt.savefig('yoyo-{:02d}-{:04d}.png'.format(d,N))
         plt.clf()
 
-    tests = np.array(tests)
-    trains = np.array(trains)
-    dds = np.array(dds)
-    plt.plot(dds, trains, c='red')
-    plt.plot(dds, tests, c='blue')
-    plt.plot(dds, np.array(bads), c='orange')
-
+    DDS = dds
+    tests = np.array(tests) 
+    trains= np.array(trains)
+    bads  = np.array(bads ) 
+    
+    plt.plot(DDS, trains, c='red')
+    plt.plot(DDS, tests, c='blue')
+    plt.plot(DDS, bads, c='orange')
+    #plt.plot(DDS, tests-bads, c='green')
+    
     best_val, best_idx = min((v,i) for i,v in enumerate(tests))
-    plt.plot([dds[best_idx], max(dds)],      [best_val, best_val], c='blue', linestyle='dashed')
-    plt.plot([dds[best_idx], dds[best_idx]], [0.0, best_val],      c='blue', linestyle='dashed')
-
-    plt.ylim(([0.0, 0.1]))
-    plt.yticks(([0.0, 0.1]))
+    plt.plot([DDS[best_idx], max(DDS)],      [best_val, best_val], c='blue', linestyle='dashed')
+    plt.plot([DDS[best_idx], DDS[best_idx]], [0.0, best_val],      c='blue', linestyle='dashed')
+    
+    #plt.yscale('log')
+    #plt.ylim([0.05, 0.2])
+    #plt.yticks([0.05, 0.2])
+    plt.ylim([0.0, 0.15])
+    plt.yticks([0.0, 0.1])
     plt.xticks(([1,3,6,10,15,21,28]))
+    plt.ylabel('error', fontdict=fd)
     plt.xlabel('data dimension after preprocessing', fontdict=fd)
     plt.gca().spines['right'].set_visible(False)
     plt.gca().spines['top'].set_visible(False)
-
+    
     plt.tight_layout()
     plt.savefig('yoyoyo-{:04d}.png'.format(N))
     plt.clf()
