@@ -158,7 +158,7 @@ for NN in [2,8,16,64]:
                 theta = theta + 0.01 * squeaky()
                 step += 1
                 
-                if step % 200 and step not in [10,100, 1,2,4,16,64,256]: continue
+                if (step % 200 and (300<step or (step%10 and 10<step))): continue
             
                 bb = badness()
                 e_train = 1.0 - accuracy()
@@ -170,7 +170,7 @@ for NN in [2,8,16,64]:
                 err_tests_inner.append(e_test)
             
                 if offset: continue 
-                if step not in [1, 10, 100, 10000]: continue
+                if step not in [10, 100, 1000, 10000]: continue
                 if (d,N) not in ((2,2), (2, 64), (10,16), (28,2), (28, 64)): continue
             
                 print('badness {:6.2f}% ... test err {:3.0f}% ... theta {:s}'.format(

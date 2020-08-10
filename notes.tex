@@ -25,8 +25,11 @@
 \newcommand{\Gg}{\mathcal{G}}
 \newcommand{\Hh}{\mathcal{H}}
 \newcommand{\Ii}{\mathcal{I}}
+\newcommand{\Kk}{\mathcal{K}}
 \newcommand{\Ll}{\mathcal{L}}
-\newcommand{\Ss}{\mathcal{S}}
+\newcommand{\Tt}{\mathcal{T}}
+\newcommand{\Uu}{\mathcal{U}}
+\newcommand{\Vv}{\mathcal{V}}
 \newcommand{\Xx}{\mathcal{X}}
 \newcommand{\Yy}{\mathcal{Y}}
 
@@ -36,10 +39,11 @@
     \parbox{\wd0}{\box0}\endgroup%
 }
 
-\newcommand{\Ein}{\Ee_{\text{in},\Ss}}
-\newcommand{\Einb}{\Ee_{\text{in},\tilde\Ss}}
-\newcommand{\Einc}{\Ee_{\text{in},\Ss\cup\tilde\Ss}}
-\newcommand{\Eout}{\Ee_{\text{out}}}
+\newcommand{\Ein} {\text{trn}_{\Uu}} %{\Ee_{\text{in},\Uu}}
+\newcommand{\Einb}{\text{trn}_{\Vv}} %{\Ee_{\text{in},\Vv}}
+\newcommand{\Einc}{\text{trn}_{\Uu\cup\Vv}} %{\Ee_{\text{in},\Uu\cup\Vv}}
+\newcommand{\Egap}{\text{gap}_{\Uu}}
+\newcommand{\Eout}{\text{tst}} %{\Ee_{\text{out}}}
 
 \begin{document}
 
@@ -219,7 +223,9 @@
             $\Yy=\{\text{Cow},\text{Dog}\}$ is the set of buckets.  We posit a
             probability distribution $\Dd$ over $\Xx \times \Yy$ that says
             which pairs $(x,y)\in \Xx\times \Yy$ are more likely and which are
-            less likely.  For instance: we might have $\sdia{cow-a},
+            less likely.
+
+            For instance: we might have $\sdia{cow-a},
             \sdia{cow-d},\cdots \in \Xx$, and $\Dd$ might say that
             %
             $(\sdia{cow-a}, \text{Cow})$ is more likely to occur in nature than 
@@ -230,8 +236,8 @@
             A \textbf{classifier} is then a function from images to
             buckets, that is, some $f\in \Yy^{\Xx}$.  By \textbf{learning}, we
             mean acquiring information about $\Dd$ from ``training samples''
-            $\Ss \in (\Xx\times\Yy)^N$ drawn independently from $\Dd$.  So
-            ``learning to classify'' means mapping $\Ss$s to $f$s.  In
+            $\Uu \in (\Xx\times\Yy)^N$ drawn independently from $\Dd$.  So
+            ``learning to classify'' means mapping $\Uu$s to $f$s.  In
             particular, an \textbf{algorithm} is a function
             $\Ll:(\Xx\times\Yy)^N\to \Yy^{\Xx}$.\footnote{ 
                 By the way, we don't have to know $\Dd$ in order to apply our
@@ -267,10 +273,10 @@
 
         \newpage
         \section{When is an algorithm good?}
-            An algorithm $\Ll$ is good when $\Ll(\Ss)$ accurately classifies
+            An algorithm $\Ll$ is good when $\Ll(\Uu)$ accurately classifies
             images freshly drawn from $\Dd$.  Notice that this is different
-            from merely asking that $\Ll(\Ss)$ accurately classifies the
-            elements of $\Ss$!  To notate this difference, we define the
+            from merely asking that $\Ll(\Uu)$ accurately classifies the
+            elements of $\Uu$!  To notate this difference, we define the
             \textbf{out-error} and \textbf{in-error} (also called the test and
             train errors) of a candidate $f \in \Hh$
             as
@@ -279,20 +285,20 @@
                                f(x) \neq y
                            \right]
                 ~~~~~~~~~~
-                \Ein(f) = \PP_{(x,y)\sim\Ss} \left[
+                \Ein(f) = \PP_{(x,y)\sim\Uu} \left[
                               f(x) \neq y
                           \right]
             $$
             Likewise, the out- and in-errors of a algorithm are
             $
-                \Ee_{\cdots}(\Ll) = \Ee_{\cdots}(\Ll(\Ss)) 
-            $ where $\Ss\sim\Dd$.
+                \Ee_{\cdots}(\Ll) = \Ee_{\cdots}(\Ll(\Uu)) 
+            $ where $\Uu\sim\Dd$.
 
             We hope $\Eout$ is low, but we don't know
-            $\Eout$: from $\Ss$, we can directly calculate only
+            $\Eout$: from $\Uu$, we can directly calculate only
             $\Ein$.  Intuiting that
             $ 
-                \Ee_{\text{gap},\Ss} = \Eout - \Ein
+                \Egap = \Eout - \Ein
             $ 
             tends to be small, we might design $\Ll$ to minimize $\Ein$.
             That is, $\Ll$ computes $\Ein(f)$ for
@@ -302,9 +308,9 @@
                 machine learning.
             }
             
-            This $\Ll$ will work when $\Ee_{\text{gap},\Ss}$ is small.
-            But is $\Ee_{\text{gap},\Ss}$ actually small?  In particular, if
-            $\Ll(\Ss)$ accurately classifies its training samples, will it also
+            This $\Ll$ will work when $\Egap$ is small.
+            But is $\Egap$ actually small?  In particular, if
+            $\Ll(\Uu)$ accurately classifies its training samples, will it also
             accurately classify test samples it has never before seen?
 
             Sometimes, the answer is \textbf{yes}.
@@ -312,7 +318,7 @@
                 datapoints, then $\Ee_{\cdots}(\Ll) = \Ee_{\cdots}(f)$, and
                 $\Ein(f)$ will very probably be very close to
                 $\Eout(f)$.  A technical reason for this is that
-                $\Ll(\Ss)$ and $\Ss$ are independent, and we may apply the law
+                $\Ll(\Uu)$ and $\Uu$ are independent, and we may apply the law
                 of large numbers.  It's as if we roll a fair die a thousand
                 times: we'd expect about a sixth of the rolls to land on
                 \epsdice{5}.
@@ -320,11 +326,11 @@
             Other times, the answer is \textbf{no}.
                 If every possible classifier is a candidate (so $\Hh$ is very
                 infinite) and only a few datapoints, then for any training
-                sequence $\Ss$, many candidates will perfectly classify the
+                sequence $\Uu$, many candidates will perfectly classify the
                 training samples.  Say that $\Ll$ breaks ties 
                 by settling on
                 $$
-                    f(x) = \text{say Cow if $(x,\text{Cow}) \in \Ss$;
+                    f(x) = \text{say Cow if $(x,\text{Cow}) \in \Uu$;
                             otherwise, say Dog}
                 $$
                 The problem (assuming each image appears with negligible chance
@@ -453,18 +459,18 @@
             What if $\Hh$ contains multiple (say, $H$ many) candidates?
             Well, each candidate $f\in \Hh$ has
             $
-                \Ee_{\text{gap},\Ss}(f) \geq \Gg(\delta/H)
+                \Egap(f) \geq \Gg(\delta/H)
             $
             with probability at most $\delta/H$.  Therefore, the chance
             that some $f\in \Hh$ has
             $
-                \Ee_{\text{gap},\Ss}(\Ll) \geq \Gg(\delta/H)
+                \Egap(\Ll) \geq \Gg(\delta/H)
             $
             is at most $H$ times $\delta/H$.  In sum,
             with probability at least $1-\delta$ the gap will be small:
             $$
-                \Ee_{\text{gap},\Ss}(\Ll)
-                    \leq \max_{f\in\Hh} \Ee_{\text{gap}, \Ss}(f)
+                \Egap(\Ll)
+                    \leq \max_{f\in\Hh} \Egap(f)
                     < \Gg(\delta/H)
                     = \sqrt{\log(H/\delta)/N}
             $$
@@ -474,9 +480,9 @@
             the generalization gap is small.
 
             For example, suppose we train a neural net that has $10^4$
-            parameters, each represented by $32$ bits.  Since
-            there are $2^{32}$ values for each parameter, $H \leq 2^{32\cdot 10^4}$.
-            If we train on $10^7$ images, then with probability $99\%=1-10^{-2}$,
+            parameters, each represented by $32$ bits.  Since there are
+            $2^{32}$ values for each parameter, $H \leq 2^{32\cdot 10^4}$.  If
+            we train on $10^7$ images, then with probability $99\%=1-10^{-2}$,
             the gap is less than
             $$
                 \sqrt{\log(2^{32\cdot 10^4}/10^{-2})/10^7}
@@ -497,7 +503,7 @@
             noting that computers (approximately) represent real
             numbers using $32$ bits each:
             $$
-                \text{gap} \leq \sqrt{\frac{32 \cdot \text{number of parameters} \cdot \log(2) + \log(1/\delta)}{N}}
+                \Egap \leq \sqrt{\frac{32 \cdot \text{number of parameters} \cdot \log(2) + \log(1/\delta)}{N}}
             $$
             But, shouldn't $32$ bits or $64$ bits or infinitely many bits
             yield similar behavior?  Intuitively, the $\Hh$s we care about
@@ -508,50 +514,47 @@
             Let's strive for a bound that depends on $\Hh$'s ``jaggedness''
             instead of its literal size.
 
-            Even though $\Hh$
-            may be infinite, the candidates in $\Hh$ may classify any finite
-            (train set $\Ss$ and) test set $\tilde\Ss$ in only finitely many
-            ways.\footnote{
-                Let $|\tilde\Ss|=|\Ss|=N$.  The train and test
+            Even though $\Hh$ may be infinite, the candidates in $\Hh$ may
+            classify any finite (train set $\Uu$ and) test set $\Vv$ in only
+            finitely many ways.\footnote{
+                Let $|\Vv|=|\Uu|=N$.  The train and test
                 sets are symmetrical, hence the section's name.
             }
             %
-            So let us fix $f\in \Hh$ and replace $\Eout(f)$ by
-            $\Einb(f)$.
-            We may do this because $\Eout,\Einb$ are probably close: by Chernoff, 
-            $\Eout(f) \leq \Einb(f) + g/2$ with chance at least $1/2$
-            for reasonable values of $g$.\footnote{
+            So let us fix $f\in \Hh$ and replace $\Eout(f)$ by $\Einb(f)$.  We
+            may do this because $\Eout,\Einb$ are probably close: by Chernoff,
+            $\Eout(f) \leq \Einb(f) + g/2$ with chance at least $1/2$ for
+            reasonable values of $g$.\footnote{
                 Specifically, when $g$ is no smaller than $2/\sqrt{N}$.  A gap
                 of $\approx 1/\sqrt{N}$ is the best we may hope for, since this
                 is the one-candidate gap for lenient $\delta$.   
             }
             \begin{align*}
                     ~& \PP[\Ein + g \leq \Eout]                                 &  \\
-                =   ~& \PP[\Ein + g \leq \Eout \mid \Eout \leq \Einb + g/2]     & \text{$\Ss,\tilde\Ss$ are independent} \\
+                =   ~& \PP[\Ein + g \leq \Eout \mid \Eout \leq \Einb + g/2]     & \text{$\Uu,\Vv$ are independent} \\
                 \leq~& \PP[\Ein + g/2 \leq \Einb \mid \Eout \leq \Einb + g/2]   & \text{chain the inequalities} \\
                 \leq~& \PP[\Ein + g/2 \leq \Einb] \cdot 2                       & \text{$\Eout,\Einb$ are probably close}
             \end{align*}
 
-            Now let $f$ range over $\Hh_{\Ss\cup\tilde\Ss}$, the set of
-            candidates \textbf{restricted} to $\Ss\cup\tilde\Ss$.
-            Then:
+            Now let $f$ range over $\Hh[{\Uu\cup\Vv}]$, the set of candidates
+            \textbf{restricted} to $\Uu\cup\Vv$.  Then:
             \begin{align*}
-                \PP[g \leq \Ee_{\text{gap}}(\Ll(\Ss))]
-                \leq~& \PP[\Ein(\Ll(\Ss)) + g/2 \leq \Einb(\Ll(\Ss))] \cdot 2 \\
-                \leq~& \sum_{f\in \Hh|_{\Ss\cup\tilde\Ss}} \PP[\Ein(f) + g/2 \leq \Einb(f)] \cdot 2 \\
-                =   ~& \sum_{f\in \Hh|_{\Ss\cup\tilde\Ss}} \PP[\Ein(f) + g/4 \leq \Einc(f)] \cdot 2
+                \PP[g \leq \Egap(\Ll(\Uu))]
+                \leq~& \PP[\Ein(\Ll(\Uu)) + g/2 \leq \Einb(\Ll(\Uu))] \cdot 2 \\
+                \leq~& \sum_{\tiny f\in \Hh_{\Uu\cup\Vv}} \PP[\Ein(f) + g/2 \leq \Einb(f)] \cdot 2 \\
+                =   ~& \sum_{\tiny f\in \Hh_{\Uu\cup\Vv}} \PP[\Ein(f) + g/4 \leq \Einc(f)] \cdot 2
             \end{align*}
             In the final line above, we noted $\Einc$ is the average of
-            $\Ein$ and $\Einb$.  Now, imagine $\Ss$ as sampled \emph{without
-            replacement} from $\Ss\cup\tilde\Ss$; this should estimate
+            $\Ein$ and $\Einb$.  Now, imagine $\Uu$ as sampled \emph{without
+            replacement} from $\Uu\cup\Vv$; this should estimate
             the mean $\Einc$ even better than sampling with replacement, so
             Chernoff applies, and each summand is at most
             $
                 \exp(-Ng^2/16)
             $.
             Likewise, there are at most $H(2N)$ many terms if $H(2N)$ is the
-            biggest possible size of $\Hh_{\Ss\cup\tilde\Ss}$ given that
-            $|\Ss\cup\tilde\Ss|=2N$.  So:
+            biggest possible size of $\Hh_{\Uu\cup\Vv}$ given that
+            $|\Uu\cup\Vv|=2N$.  So:
             $$
                 \cdots \leq H(2N) \cdot \exp(-Ng^2/16) \cdot 2
             $$
@@ -638,7 +641,7 @@
 
             Plugging this all in, we find that
             $
-               g \leq \Ee_{\text{gap}}(\Ll(\Ss))
+               g \leq \Egap(\Ll(\Uu))
             $ with chance at most
             $
                (2N+2)^k \cdot \exp(-Ng^2/16) \cdot 2
@@ -656,7 +659,7 @@
                 dimension}.
             } of $\Hh$, then what we get is:
             $$
-                \text{gap}
+                \Egap
                 \leq
                 \sqrt{\frac{16\log(2N+2) \cdot \text{jaggedness} + 16\log(2/\delta)}{N}}
             $$
@@ -795,17 +798,17 @@
             \newpage
         \section{Optimization}
             How do we select $f\in \Hh_{\text{lin}}$ based on the data
-            $\Ss$?  Since the jaggedness $d$ is finite, it makes sense to
+            $\Uu$?  Since the jaggedness $d$ is finite, it makes sense to
             seek an $f$ with low training error:
             $$
                 N \cdot \Ein(\theta) =
-                    \sum_{(x,\text{Cow})\in \Ss}
+                    \sum_{(x,\text{Cow})\in \Uu}
                     \begin{cases} 
                         1       &       \text{if}~\theta(x) < 0 \\
                         0       &       \text{otherwise}
                     \end{cases}
                     + 
-                    \sum_{(x,\text{Dog})\in \Ss}
+                    \sum_{(x,\text{Dog})\in \Uu}
                     \begin{cases} 
                         1       &       \text{if}~\theta(x) > 0 \\
                         0       &       \text{otherwise}
@@ -842,13 +845,13 @@
             \begin{align*}
                 \text{badness}(\theta) = 
             {\small
-                    \sum_{(x,\text{Cow})\in \Ss}
+                    \sum_{(x,\text{Cow})\in \Uu}
                     \begin{cases} 
                         1-\theta(x)    &   \text{if}~\theta(x) < +1 \\
                         0              &   \text{otherwise}
                     \end{cases}
                     +
-                    \sum_{(x,\text{Dog})\in \Ss}
+                    \sum_{(x,\text{Dog})\in \Uu}
                     \begin{cases} 
                         1+\theta(x)    &   \text{if}~\theta(x) > -1\\
                         0              &   \text{otherwise}
@@ -878,12 +881,12 @@
             \begin{align*}
                 \text{improvement}
                 &\approx
-                    \sum_{(x,\text{Cow})\in \Ss}
+                    \sum_{(x,\text{Cow})\in \Uu}
                     \begin{cases} 
                         \epsilon(x)      &       \text{if}~\theta(x) < +1 \\
                         0                &       \text{otherwise}
                     \end{cases}
-                    +\sum_{(x,\text{Dog})\in \Ss}
+                    +\sum_{(x,\text{Dog})\in \Uu}
                     \begin{cases} 
                         -\epsilon(x)     &       \text{if}~\theta(x) > -1\\
                         0                &       \text{otherwise}
@@ -892,9 +895,9 @@
                 &=
                     \epsilon\left(
                         +
-                        \sum_{\substack{(x,\text{Cow})\in \Ss \\ \text{and}~\theta(x)<+1}} x
+                        \sum_{\substack{(x,\text{Cow})\in \Uu \\ \text{and}~\theta(x)<+1}} x
                         -
-                        \sum_{\substack{(x,\text{Dog})\in \Ss \\ \text{and}~\theta(x)>-1}} x
+                        \sum_{\substack{(x,\text{Dog})\in \Uu \\ \text{and}~\theta(x)>-1}} x
                     \right)
                 = \epsilon(x_{\text{squeaky}})
             \end{align*}
@@ -942,6 +945,8 @@
     \newpage
     \chapter{Example: Classifying Clothing}
         \section{Featurizing and learning}
+
+
             \begin{figure}[h]
                 \centering
                 \includegraphics[height=4.2cm]{yo-10-0016-soft-10}
@@ -960,6 +965,15 @@
                     \textbf{Bottom}: the prediction $\text{sign}(\theta(x))$. 
                 }}
             \end{figure}
+
+            \begin{marginfigure}
+                \centering
+                \includegraphics[height=12cm]{fashion-mnist-cropped}
+                \caption{\emph{
+                }}
+            \end{marginfigure}
+
+
 
             \newpage
         \section{Seeing overfitting}
@@ -1022,10 +1036,6 @@
     %\chapter{Structure in $\Dd$}
     %    \section{Rademacher Complexity}
     %    \section{Margin Bounds}
-
-    %\chapter{Structure in $\Ll$}
-    %    \section{Privacy and Generalization}
-    %    \section{The Akaike Information Criterion and its Cousins}
 
     %\chapter{Frame Conditions and Independence}
     %    \section{Simplicity and Subjectivity}
@@ -1253,6 +1263,27 @@
 
 
 
+    \newpage
+    \chapter{Mutual Information}
+        \section{Structure in $\Dd$ and $\Ll$}
+            Our gap bound so far invokes $H(n)$, which counts the worst-case
+            size of $\Hh_\Uu$ over all training sets of size $n$.  However, 
+            what if the distribution $\Dd$ is concentrated around ``easy''
+            data so that most of the time, $|\Hh_\Uu|$ is much smaller than
+            $H(n)$?  For example, what if there's only a $\delta/2$ chance that
+            $\Uu \sim \Dd^n$ has $|\Hh_\Uu| \geq H_{\delta/2}(n)$?  Then with
+            chance at least $1-\delta/2-\delta/2$, we have:
+            $$
+                \Egap
+                \leq
+                \sqrt{\frac{16 \log(2H_{\delta/2}(2N)/(\delta/2))}{N}}
+            $$
+
+            %More generally, if we know that whenever $\Uu\in\Ee\subseteq\Dd^N$
+            %then $\Ll(\Uu) \in \Kk \subseteq\Hh$, and that $\Ee$ occurs with
+            %probability $1-\rho$, then 
+
+        \section{Structure in}
 
 \end{document}
 

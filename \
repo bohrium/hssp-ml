@@ -1,0 +1,323 @@
+\documentclass[twocolumn]{article}
+\usepackage{amsmath, amssymb, amsthm, bm}
+\usepackage{geometry, graphicx, epsdice, xcolor, listings}
+
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\RR}{\mathbb{R}}
+%
+\newcommand{\Dd}{\mathcal{D}}
+\newcommand{\Ee}{\mathcal{E}}
+\newcommand{\Gg}{\mathcal{G}}
+\newcommand{\Hh}{\mathcal{H}}
+\newcommand{\Ii}{\mathcal{I}}
+\newcommand{\Kk}{\mathcal{K}}
+\newcommand{\Ll}{\mathcal{L}}
+\newcommand{\Tt}{\mathcal{T}}
+\newcommand{\Uu}{\mathcal{U}}
+\newcommand{\Vv}{\mathcal{V}}
+\newcommand{\Xx}{\mathcal{X}}
+\newcommand{\Yy}{\mathcal{Y}}
+
+\newcommand{\sdia}[1]{%
+    \begingroup%
+    \setbox0=\hbox{\includegraphics[height=\baselineskip]{#1}}%
+    \parbox{\wd0}{\box0}\endgroup%
+}
+
+\newcommand{\Ein} {\text{trn}_{\Uu}} %{\Ee_{\text{in},\Uu}}
+\newcommand{\Einb}{\text{trn}_{\Vv}} %{\Ee_{\text{in},\Vv}}
+\newcommand{\Einc}{\text{trn}_{\Uu\cup\Vv}} %{\Ee_{\text{in},\Uu\cup\Vv}}
+\newcommand{\Egap}{\text{gap}_{\Uu}}
+\newcommand{\Eout}{\text{tst}} %{\Ee_{\text{out}}}
+
+\begin{document}
+
+    \twocolumn[
+      \begin{@twocolumnfalse}
+        \begin{flushleft}  \Huge  \emph{What is...} \\\hrule \end{flushleft}
+        \begin{flushright} \Huge  VC Dimension?     \end{flushright}
+        \begin{flushright} \Large Samuel Tenka      \end{flushright}
+      \end{@twocolumnfalse}
+    ]
+
+    Mathematicians and bakers alike know the sequence $1, 2, 4, 8, 16, \cdots$
+    by heart.  It continues, of course, with $31$, for its $n$th element $p(n)
+    $counts the pieces obtained from a disk-shaped cake by cutting along all
+    ${n\choose 2}$ lines determined by $n$ points generically placed on the
+    cake's perimeter.
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[height=2.3cm]{cake-1}
+        \includegraphics[height=2.3cm]{cake-2}
+        \includegraphics[height=2.3cm]{cake-3}
+        \includegraphics[height=2.3cm]{cake-4}
+        \includegraphics[height=2.3cm]{cake-5-col}
+        \includegraphics[height=2.3cm]{cake-6-col}
+        \caption{\emph{
+            Cakes with $n=1$ through $6$.
+            For instance, the $n=4$ cake (bottom left) has $8$ pieces.  We
+            color some pieces to make them easier to see and
+            to count.  The number of pieces for $n=6$ is clearly odd: the
+            pieces besides for the central yellow triangle are arranged into
+            groups of six.
+        }}
+    \end{figure}
+
+    Rather than growing like powers of two, $p(n)$ is, in fact, a polynomial.  
+    It is fun and easy to compute $p(n)$ by regarding each sliced cake as a
+    planar graph, observing that the interior points are each determined by two
+    slices and hence by one of ${n\choose 4}$ many sets of $4$ perimeter
+    points, and then applying Euler's polyhedron formula.  The result is that
+    $p(n)$ is the sum ${n-1 \choose 0}+\cdots+{n-1\choose 4}$, which explains
+    why, for small $n$, $p(n)$ coincides with $2^{n-1}$.
+
+    In general, we may wonder: if from a collection $\Hh$ of possible
+    patterns we find some $f\in \Hh$ that matches all $N$ examples we've seen,
+    when and why should we expect that $f$ matches further examples?
+
+            Let's analyze the case $|\Hh|=1$ more closely.  We write $p$ as
+            shorthand for $\Eout(f)$; then $\Ein$
+            counts the fraction of heads that appear in $N$ independent flips
+            of a coin that has chance $p$ of landing heads.  Intuitively
+            $\Ein$ will usually be close to $p$ when $N$ is big.
+            Let's make ``usually'', ``close to'', and ``big''  precise.
+
+            \begin{figure}[h!]
+                \centering
+                \includegraphics[height=4cm]{chernoff}
+                \caption{\emph{
+                    We randomly select points on $N$ vertical sticks.  Each
+                    stick has three parts: \textbf{green} with length $1-p$,
+                    \textbf{red} with length $p$, and \textbf{blue} with length
+                    $g$.  We call non-blue points \textbf{boxed} and non-green
+                    points \textbf{hollow}.
+                }}
+            \end{figure}
+
+            We'll switch viewpoints: flipping a coin is like choosing a boxed
+            point on a stick where green means tails and red means heads.
+            %
+            We'll show that probably at most $M_0 = (p+g)N$ heads
+            appear.  That is, we want to show --- given that all points are
+            boxed --- that probably at most $M_0$ points are red. 
+            %
+            For any $M\geq M_0$:
+            \begin{align*}
+                    & ~ \PP[\text{$M$ are red $\mid$ all are boxed}] \\
+                  = & ~ \PP[\text{$M$ are red and all are boxed}] ~/~ 
+                        \PP[\text{all are boxed}]  \\
+                  = & ~ \PP[\text{$M$ are hollow}] \cdot
+                        \PP[\text{all hollows are red $\mid$ $M$ are hollow}] ~/~
+                        \PP[\text{all are boxed}] \\
+                  = & ~ \PP[\text{$M$ are hollow}] \cdot (1+g/p)^{-M} ~/~ (1+g)^{-N}  \\
+                \leq& ~ \PP[\text{$M$ are hollow}] \cdot (1+g/p)^{-M_0} ~/~ (1+g)^{-N} 
+            \end{align*}
+            Since the above holds for all $M\geq M_0$, we see that:
+            \begin{align*}
+                ~& ~ \PP[\text{at least $M_0$ are red $\mid$ all are boxed}] \\
+                \leq& ~ \PP[\text{at least $M_0$ are hollow}] \cdot (1+g/p)^{-M_0} / (1+g)^{-N} \\ 
+                \leq& ~ (1+g/p)^{-M_0} / (1+g)^{-N}             & \text{probabilities are at most $1$} \\
+                \leq& ~ \exp(-M_0 g/p) \exp(Ng)                 & \text{$1+x\leq \exp(x)$} \\ 
+            \end{align*}
+
+            We can simplify using algebra to conclude:
+            \begin{align*}
+                \cdots
+                =   & ~ \exp(-(p+g)N g/p + Ng)                  & \text{substitute $M_0=(p+g)N$} \\ 
+                =   & ~                          \exp(-Ng^2/p)  & \text{simplify}                \\ 
+                \leq& ~ \exp(-Ng^2)                             & \text{probabilities are at most $1$}
+            \end{align*}
+            This is the \textbf{Chernoff bound} for coin flips.\footnote{
+                There are lots of versions of this bound.  Google up 
+                ``multiplicative Chernoff bound'' or ``Bernstein inequality''
+                for some fun examples!
+            }
+
+            Last time, we bounded the generalization gap by
+            noting that computers (approximately) represent real
+            numbers using $32$ bits each:
+            $$
+                \Egap \leq \sqrt{\frac{32 \cdot \text{number of parameters} \cdot \log(2) + \log(1/\delta)}{N}}
+            $$
+            But, shouldn't $32$ bits or $64$ bits or infinitely many bits
+            yield similar behavior?  Intuitively, the $\Hh$s we care about
+            depend smoothly instead of jaggedly on the parameters, meaning that
+            tiny changes in the parameters yield practically the same
+            candidate.  
+            %
+            Let's strive for a bound that depends on $\Hh$'s ``jaggedness''
+            instead of its literal size.
+
+            Even though $\Hh$ may be infinite, the candidates in $\Hh$ may
+            classify any finite (train set $\Uu$ and) test set $\Vv$ in only
+            finitely many ways.\footnote{
+                Let $|\Vv|=|\Uu|=N$.  The train and test
+                sets are symmetrical, hence the subsection's name.
+            }
+            %
+            So let us fix $f\in \Hh$ and replace $\Eout(f)$ by $\Einb(f)$.  We
+            may do this because $\Eout,\Einb$ are probably close: by Chernoff,
+            $\Eout(f) \leq \Einb(f) + g/2$ with chance at least $1/2$ for
+            reasonable values of $g$.\footnote{
+                Specifically, when $g$ is no smaller than $2/\sqrt{N}$.  A gap
+                of $\approx 1/\sqrt{N}$ is the best we may hope for, since this
+                is the one-candidate gap for lenient $\delta$.   
+            }
+            \begin{align*}
+                    ~& \PP[\Ein + g \leq \Eout]                                 &  \\
+                =   ~& \PP[\Ein + g \leq \Eout \mid \Eout \leq \Einb + g/2]     & \text{$\Uu,\Vv$ are independent} \\
+                \leq~& \PP[\Ein + g/2 \leq \Einb \mid \Eout \leq \Einb + g/2]   & \text{chain the inequalities} \\
+                \leq~& \PP[\Ein + g/2 \leq \Einb] \cdot 2                       & \text{$\Eout,\Einb$ are probably close}
+            \end{align*}
+
+            Now let $f$ range over $\Hh[{\Uu\cup\Vv}]$, the set of candidates
+            \textbf{restricted} to $\Uu\cup\Vv$.  Then:
+            \begin{align*}
+                \PP[g \leq \Egap(\Ll(\Uu))]
+                \leq~& \PP[\Ein(\Ll(\Uu)) + g/2 \leq \Einb(\Ll(\Uu))] \cdot 2 \\
+                \leq~& \sum_{\tiny f\in \Hh_{\Uu\cup\Vv}} \PP[\Ein(f) + g/2 \leq \Einb(f)] \cdot 2 \\
+                =   ~& \sum_{\tiny f\in \Hh_{\Uu\cup\Vv}} \PP[\Ein(f) + g/4 \leq \Einc(f)] \cdot 2
+            \end{align*}
+            In the final line above, we noted $\Einc$ is the average of
+            $\Ein$ and $\Einb$.  Now, imagine $\Uu$ as sampled \emph{without
+            replacement} from $\Uu\cup\Vv$; this should estimate
+            the mean $\Einc$ even better than sampling with replacement, so
+            Chernoff applies, and each summand is at most
+            $
+                \exp(-Ng^2/16)
+            $.
+            Likewise, there are at most $H(2N)$ many terms if $H(2N)$ is the
+            biggest possible size of $\Hh_{\Uu\cup\Vv}$ given that
+            $|\Uu\cup\Vv|=2N$.  So:
+            $$
+                \cdots \leq H(2N) \cdot \exp(-Ng^2/16) \cdot 2
+            $$
+            To bound the chance the gap isn't small,
+            we just have to bound $H(2N)$.
+
+
+            We see that $H(n) \leq 2^n$.  What's amazing is that this bound is
+            never somewhat-tight: depending on $\Hh$, it either is an equality
+            or extremely loose!
+
+            Indeed, consider $\Hh$ restricted to a set $S$ of size $n$.  Let us
+            order $S$ so that we may write each candidate as a string of $+$s
+            and $-$s.  We now translate these strings from the alphabet
+            $\{+,-\}$ to the alphabet $\{\blacksquare,\square\}$ in order to
+            clarify their structure.
+            %
+            The idea is that $\blacksquare$ represents ``surprisingly $+$''.
+            More precisely, we translate left to right.  Whenever two
+            (partially translated) strings differ \textbf{only} in their
+            leftmost untranslated coordinate, we overwrite the $+$ version's
+            $+$ by $\blacksquare$.  Otherwise, we overwrite by $\square$.
+
+            \definecolor{moor}{rgb}{0.85,0.1 ,0.1 }
+            \definecolor{moog}{rgb}{0.1 ,0.75,0.1 }
+            \definecolor{moob}{rgb}{0.2 ,0.4 ,1.0 }
+            \newcommand{\rR}[1]{{\color{moor}#1}}
+            \newcommand{\gG}[1]{{\color{moog}#1}}
+            \newcommand{\bB}[1]{{\color{moob}#1}}
+            \newcommand{\E}{\texttt{$\square$}}
+            \newcommand{\D}{\texttt{$\blacksquare$}}
+            \newcommand{\A}{\texttt{$\bm{+}$}}
+            \newcommand{\M}{\texttt{$\bm{-}$}}
+            \begin{figure}[h]
+                \centering
+                \begin{tabular}{ccccccccc}
+                       \A \M \M \M  &       &  \E \gG\M \M \M  &       &  \E \E \rR\M \M  &       &  \E \E \E \rR\M  &       &  \E \E \E \E  \\
+                       \M \A \M \M  &       &  \E \gG\A \M \M  &       &  \E \D    \M \M  &       &  \E \D \E \bB\M  &       &  \E \D \E \E  \\
+                       \M \M \A \M  &       &  \E    \M \A \M  &       &  \E \E \rR\A \M  &       &  \E \E \D \gG\M  &       &  \E \E \D \E  \\
+                       \M \M \M \A  & $\to$ &  \E    \M \M \A  & $\to$ &  \E \E \gG\M \A  & $\to$ &  \E \E \E \rR\A  & $\to$ &  \E \E \E \D  \\
+                       \M \M \A \A  &       &  \E \bB\M \A \A  &       &  \E \E \gG\A \A  &       &  \E \E \D \gG\A  &       &  \E \E \D \D  \\
+                    \rR\M \A \A \A  &       &  \E \bB\A \A \A  &       &  \E \D    \A \A  &       &  \E \D \E \bB\A  &       &  \E \D \E \D  \\
+                    \rR\A \A \A \A  &       &  \D    \A \A \A  &       &  \D \E    \A \A  &       &  \D \E \E    \A  &       &  \D \E \E \E
+                \end{tabular}
+                \caption{
+                    Translating from restrictions of candidates (left) to
+                    strings of choice points (right).  Each row corresponds to
+                    one of $7$ candidates 
+                    and each column corresponds to one of of $4$ datapoints.
+                    %
+                    We color pairs of strings that differ in exactly one coordinate.
+                }
+            \end{figure}
+
+            Observe that each step of this process keeps distinct strings
+            distinct.  So there will be as many translated strings as
+            original strings.
+            %
+            Moreover, whenever some $k$ indices of a translated string are
+            $\blacksquare$s, then at those $k$ points in $S$, the
+            candidates attain all $2^k$ configurations.  This is
+            because $\blacksquare$s mark choice points where the candidates
+            attain both $+$ and $-$.
+            %
+            Now, \textbf{either} $H(n)=2^n$ for all $n$,
+            \textbf{or} $H(k) \neq 2^k$ for some $k$.  In the latter 
+            case, no translated string may have $k$ or more
+            $\blacksquare$s.  So $\Hh_S$ contains at most
+            as many strings are there are subsets of $S$ of size $<k$.
+            %$
+            %    {n\choose 0} + {n\choose 1} + \cdots + {n\choose k-1}
+            %$
+            many strings.  We conclude that
+            $$
+                H(n)
+                \leq 
+                {n\choose 0} + {n\choose 1} + \cdots + {n\choose k-1}
+                \leq 
+                (n+2)^{k-1}
+            $$
+            As with Cake, what might have grown like $2^n$
+            ends up growing only polynomially!
+
+            Plugging this all in, we find that
+            $
+               g \leq \Egap(\Ll(\Uu))
+            $ with chance at most
+            $
+               (2N+2)^k \cdot \exp(-Ng^2/16) \cdot 2
+            $.
+            We can solve for the gap in terms of our tolerance $\delta$.
+            If we call the (smallest) $k$ for which $H(k+1) \neq 2^{k+1}$
+            the \textbf{jaggedness}\footnote{
+                To recap, the jaggedness of $\Hh$ is the smallest $k$ such
+                that $\Hh$ fails to fit all $2^{k+1}$ many $\pm$ patterns
+                on each dataset $S$ of size $k+1$.
+                %
+                If no such $k$ exists, we say that $\Hh$ is infinitely jagged.
+                %
+                The jaggedness is also known as the \emph{Vapnik-Chervonenkis
+                dimension}.
+            } of $\Hh$, then what we get is:
+            $$
+                \Egap
+                \leq
+                \sqrt{\frac{16\log(2N+2) \cdot \text{jaggedness} + 16\log(2/\delta)}{N}}
+            $$
+
+            Here's an example.  Consider classifying rainfall levels as
+            ``desert'' or ``non-desert'' according to how they compare to
+            some positive real number $r$.  Each $r$ gives a different
+            candidate, so there are infinitely many candidates.  But for any
+            $k=2$ rainfall levels $a<b$, no candidate classifies $a$ but not
+            $b$ as ``desert''.  So $\Hh$ has jaggedness $2-1=1$.
+            %
+            In cases like these, where the jaggedness counts the parameters, we
+            have essentially replaced the $32$ (bits per parameter) by $\approx
+            \log(N)$.\footnote{
+                Due to the constants involved, this is in practice not a
+                substantial improvement.
+            } Intuitively, each parameter has $\approx \log(N)$ bits
+            relevant to distinguishing the datapoints; further bits are
+            irrelevant to overfitting.
+
+            Generalization thus stems from $\Hh$'s shape, not its literal size.
+            Unless $\Hh$ is infinitely jagged, the gap will shrink as $N$
+            grows.  In this case, learning from data is possible.
+\end{document}
+
+
